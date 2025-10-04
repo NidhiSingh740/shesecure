@@ -1,0 +1,85 @@
+
+/* --- Solution Section Styles --- */
+
+.solution-section {
+  padding: 5rem 3rem;
+  background-color: #f8f9fa; /* Light grey background */
+  text-align: center;
+}
+
+.solution-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.solution-section h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.solution-section .solution-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto 3rem auto;
+  line-height: 1.6;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Creates a three-column layout */
+  gap: 2rem;
+}
+
+.feature-card {
+  background: #ffffff;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.feature-card h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.feature-card p {
+  color: #555;
+  line-height: 1.7;
+}
+
+
+/* --- Responsive Design --- */
+
+/* Tablet view */
+@media (max-width: 992px) {
+  .features-grid {
+    grid-template-columns: 1fr; /* Stacks the cards vertically */
+    gap: 1.5rem;
+  }
+  
+  .solution-section {
+    padding: 4rem 2rem;
+  }
+}
+
+/* Mobile view */
+@media (max-width: 576px) {
+  .solution-section {
+    padding: 3rem 1.5rem;
+  }
+  
+  .solution-section h2 {
+    font-size: 2rem;
+  }
+}

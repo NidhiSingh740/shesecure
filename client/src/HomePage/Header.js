@@ -1,0 +1,133 @@
+import React from "react";
+import { useNavigate } from "react-router-dom"; // Step 1: Import useNavigate
+
+// Styles are embedded directly within the component to make it self-contained.
+const HeaderStyles = () => (
+  <style>
+    {`
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 30px;
+        background-color: white;
+        color: rgb(87, 85, 85);
+        font-family: 'Arial', sans-serif;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+      }
+
+      .header .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .header .header-right {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+      }
+
+      .header .nav-links {
+        display: flex;
+        gap: 30px;
+      }
+
+      .header .nav-links a {
+        color: rgb(61, 61, 61);
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .header .nav-links a:hover {
+        color: #212120;
+      }
+
+      .header .get-started .btn-primary {
+        background-color: #7C4DFF;
+        color: white;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem; /* Added for consistency */
+        text-decoration: none; /* Ensure no underline */
+        display: inline-block; /* Proper alignment */
+      }
+
+      .header .get-started .btn-primary:hover {
+        background-color: #6c40e0;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      @media (max-width: 768px) {
+        .header {
+          flex-direction: column;
+          gap: 15px;
+          padding: 15px 20px;
+        }
+        
+        .header .header-right {
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .header .nav-links {
+          flex-direction: column;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .header .get-started {
+          margin-top: 10px;
+        }
+      }
+    `}
+  </style>
+);
+
+const Header = () => {
+  // Step 2: Initialize the navigate function
+  const navigate = useNavigate();
+
+  // Step 3: Create a handler for the button click
+  const handleGetStartedClick = () => {
+    // This will navigate the user to the signup page.
+    // You can change this to '/login' if you prefer.
+    navigate('/signup');
+  };
+
+  return (
+    <>
+      <HeaderStyles />
+      <header className="header">
+        <div className="logo">SafeWalk</div>
+        <div className="header-right">
+          <nav className="nav-links">
+            <a href="#features">Features</a>
+            <a href="#howitworks">How It Works</a>
+            <a href="#about">About</a>
+          </nav>
+          <div className="get-started">
+            {/* Step 4: Add the onClick event to the button */}
+            <button className="btn-primary" onClick={handleGetStartedClick}>
+              Get Started
+            </button>
+          </div>
+        </div>
+      </header>
+    </>
+  );
+};
+
+export default Header;

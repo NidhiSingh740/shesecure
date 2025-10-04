@@ -1,0 +1,121 @@
+
+/* --- Challenges Section Styles --- */
+
+.challenges-section {
+  padding: 5rem 3rem;
+              background: linear-gradient(135deg, #f6f2f4ff, #f1ebf9ff);
+
+ /* Or a very light grey like #fdfdfd */
+}
+
+.challenges-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4rem;
+}
+
+/* Left side content */
+.challenges-content {
+  flex-basis: 55%; /* Takes up a bit more than half the space */
+}
+
+.challenges-content h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+
+
+  margin-bottom: 1rem;
+}
+
+.challenges-content .intro-text {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.challenges-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.challenges-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.challenges-list h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.3rem 0;
+}
+
+.challenges-list p {
+  margin: 0;
+  color: #555;
+}
+
+/* Right side statistic card */
+.stat-card {
+  flex-basis: 35%;
+  background-color: #fff4f4; /* Soft pink/red background */
+  border-radius: 12px;
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.stat-card h3 {
+  font-size: 2rem;
+  color: #d92121; /* Strong red color */
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.stat-card p {
+  font-size: 1rem;
+  color: #555;
+  margin: 0;
+}
+
+
+/* --- Responsive Design --- */
+
+/* Tablet view */
+@media (max-width: 992px) {
+  .challenges-container {
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .challenges-content, .stat-card {
+    flex-basis: 100%; /* Full width when stacked */
+  }
+
+  .challenges-content h2 {
+    text-align: center;
+  }
+}
+
+/* Mobile view */
+@media (max-width: 576px) {
+  .challenges-section {
+    padding: 3rem 1.5rem;
+  }
+
+  .challenges-content h2 {
+    font-size: 1.8rem;
+  }
+
+  .stat-card {
+    padding: 2rem;
+  }
+}

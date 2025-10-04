@@ -1,0 +1,103 @@
+
+/* --- How It Works Section Styles --- */
+
+.how-it-works-section {
+  padding: 5rem 3rem;
+  background-color: #ffffff;
+  text-align: center;
+}
+
+.how-it-works-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.how-it-works-section h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.how-it-works-section .section-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 4rem;
+}
+
+.steps-timeline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 220px; /* Limits the width of each step */
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d54ca0, #b8369a);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(184, 54, 154, 0.3);
+}
+
+.step h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.step p {
+  color: #555;
+  line-height: 1.6;
+}
+
+.arrow-icon {
+  margin-top: 20px; /* Aligns arrow with the number circles */
+}
+
+
+/* --- Responsive Design --- */
+
+/* Tablet view */
+@media (max-width: 992px) {
+  .steps-timeline {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .arrow-icon {
+    transform: rotate(90deg); /* Points arrow downwards */
+    margin: 0;
+  }
+
+  .step {
+    max-width: 400px; /* Allows more text width when stacked */
+  }
+}
+
+/* Mobile view */
+@media (max-width: 576px) {
+  .how-it-works-section {
+    padding: 3rem 1.5rem;
+  }
+  
+  .how-it-works-section h2 {
+    font-size: 2rem;
+  }
+}

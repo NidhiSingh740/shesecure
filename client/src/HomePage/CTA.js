@@ -1,0 +1,146 @@
+
+import React from 'react';
+
+// To resolve the compile error, the external CSS file import has been removed. 
+// All necessary styles are now embedded directly within this component.
+const CTAStyles = () => (
+    <style>
+        {`
+          /* --- Call to Action (CTA) Section Styles --- */
+          .cta-section {
+            padding: 5rem 3rem;
+            background: linear-gradient(105deg, #d269aaff, #826ebbff);
+            text-align: center;
+            color: #ffffff;
+          }
+
+          .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+          }
+
+          .cta-section h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+          }
+
+          .cta-section p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+          }
+
+          .cta-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap; /* Allows buttons to wrap on small screens */
+          }
+
+          /* Base styles for both CTA buttons */
+          .btn-cta-primary,
+          .btn-cta-secondary {
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+          }
+
+          /* Primary Button (White with icon) */
+          .btn-cta-primary {
+            background-color: #ffffff;
+            color: #b8369a;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          }
+
+          .btn-cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+          }
+
+          /* Secondary Button (Ghost style) */
+          .btn-cta-secondary {
+            background-color: transparent;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+          }
+
+          .btn-cta-secondary:hover {
+            background-color: #ffffff;
+            color: #b8369a;
+          }
+
+          /* --- Responsive Design --- */
+          @media (max-width: 768px) {
+            .cta-section {
+              padding: 4rem 2rem;
+            }
+            .cta-section h2 {
+              font-size: 2.2rem;
+            }
+          }
+
+          @media (max-width: 576px) {
+            .cta-section {
+              padding: 3rem 1.5rem;
+            }
+             .cta-buttons {
+              flex-direction: column;
+              width: 100%;
+            }
+            .btn-cta-primary,
+            .btn-cta-secondary {
+              width: 80%; /* Makes buttons take more width on mobile */
+            }
+          }
+        `}
+    </style>
+);
+
+
+// A simple download icon for the button
+const DownloadIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);
+
+
+const CTA = () => {
+  return (
+    <>
+      <CTAStyles />
+      <section className="cta-section">
+        <div className="cta-container">
+          <h2>Ready to Walk Safely?</h2>
+          <p>
+            Join thousands of women who trust SafeWalk for their daily safety. Download now and experience AI-powered protection.
+          </p>
+          <div className="cta-buttons">
+            <button className="btn-cta-primary">
+              <DownloadIcon />
+              Start Your Safety Journey
+            </button>
+            <button className="btn-cta-secondary">
+              Learn More
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+};
+
+export default CTA;
+

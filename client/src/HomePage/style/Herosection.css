@@ -1,0 +1,159 @@
+
+/* General */
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+         background: linear-gradient(135deg, #f6f2f4ff, #f1ebf9ff);
+
+  color: #333;
+}
+
+.homepage {
+  width: 100%;
+  min-height: 100vh;
+  background: #fdfdfd;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 3rem;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #b8369a;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #b8369a, #6a11cb);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  border: 2px solid #b8369a;
+  background: transparent;
+  color: #b8369a;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background: #b8369a;
+  color: white;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.tagline {
+  color: #b8369a;
+  font-weight: 800;
+  font-size: 3rem;
+  letter-spacing: 1px;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin: 1rem 0;
+}
+
+.hero h1 span {
+  color: #b8369a;
+}
+
+.subtitle {
+  max-width: 650px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.hero-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+
+.stats div {
+  text-align: center;
+}
+
+.stats h2 {
+  color: #b8369a;
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+}
+
+
+
+/* Responsive for Tablets */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 1.5rem; /* Reduce padding on smaller screens */
+  }
+
+  .header .nav-links {
+    display: none; /* Hide navigation links on tablets/mobile to be replaced by a menu icon later */
+  }
+}
+
+/* Responsive for Mobile Phones */
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem;
+  }
+  
+  .header .logo {
+    font-size: 1.3rem; /* Slightly smaller logo */
+  }
+
+  .header .get-started .btn-primary {
+    padding: 0.5rem 1rem; /* Smaller button */
+    font-size: 0.9rem;
+  }
+}
