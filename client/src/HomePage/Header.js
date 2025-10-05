@@ -111,7 +111,7 @@ const Header = () => {
     <>
       <HeaderStyles />
       <header className="header">
-        <div className="logo">SafeWalk</div>
+        <div className="logo">Shesecure</div>
         <div className="header-right">
           <nav className="nav-links">
             <a href="#features">Features</a>

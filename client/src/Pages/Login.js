@@ -4,20 +4,40 @@ import { Link, useNavigate } from 'react-router-dom';
 
 // --- Styles (Can be moved to a separate CSS file) ---
 const LoginStyles = () => (
-    <style>
+     <style>
         {`
-          /* Using the same auth styles as Signup */
-          .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f8f9fa; padding: 2rem; }
-          .auth-form-wrapper { background: #ffffff; padding: 3rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); width: 100%; max-width: 450px; text-align: center; }
+          /* --- Authentication Page Styles --- */
+         .auth-container {
+  display: flex;
+  justify-content: right;
+  align-items: flex-start;   /* keeps it near the top instead of perfectly centered */
+  padding: 2rem 1rem;        /* adjust padding to control top space */
+  min-height: auto;          /* remove full screen height */
+  height: auto;              /* let it shrink naturally */
+}
+
+.auth-form-wrapper {
+  background: #ffffff;
+  padding: 0.5rem 2rem;      /* reduced padding inside the box */
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  width: 50%;
+  max-width: 350px;
+  text-align: center;
+  margin-top: 60px;    
+   margin-right: 12%; 
+  /* distance from navbar */
+}
+
           .auth-form-wrapper h2 { font-size: 2rem; color: #333; margin-bottom: 0.5rem; font-weight: 700; }
           .auth-subtext { color: #666; margin-bottom: 2rem; }
           .error-message { color: #e74c3c; background-color: #fbecec; border: 1px solid #e74c3c; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; text-align: left; }
           .auth-form { display: flex; flex-direction: column; gap: 1.25rem; text-align: left; }
           .input-group { display: flex; flex-direction: column; }
           .input-group label { font-weight: 600; color: #444; margin-bottom: 0.5rem; }
-          .input-group input { padding: 0.8rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+          .input-group input { padding: 0.6rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
           .input-group input:focus { outline: none; border-color: #b8369a; box-shadow: 0 0 0 3px rgba(184, 54, 154, 0.15); }
-          .auth-button { background: linear-gradient(90deg, #b8369a, #d54ca0); color: white; border: none; padding: 0.9rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; }
+          .auth-button { background: linear-gradient(90deg, #b8369a, #d54ca0); color: white; border: none; padding: 0.6rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; }
           .auth-switch { margin-top: 1.5rem; color: #555; }
           .auth-switch a { color: #b8369a; font-weight: 600; text-decoration: none; }
         `}

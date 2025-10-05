@@ -2,19 +2,21 @@
 .auth-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  align-items: flex-start; /* instead of center */
+  padding: 4rem 2rem;      /* adds space at top */
   background-color: #f8f9fa;
-  padding: 2rem;
+  min-height: auto;        /* remove full screen height */
 }
+
+
 
 .auth-form-wrapper {
   background: #ffffff;
   padding: 3rem;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  max-width: 450px;
+  width: 50%;
+  max-width: 150px;
   text-align: center;
 }
 
