@@ -1,7 +1,7 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // Step 1: Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { isLoggedIn, clearAuthToken } from "../utils/auth";
 
-// Styles are embedded directly within the component to make it self-contained.
 const HeaderStyles = () => (
   <style>
     {`
@@ -51,7 +51,8 @@ const HeaderStyles = () => (
         color: #212120;
       }
 
-      .header .get-started .btn-primary {
+      .header .get-started .btn-primary,
+      .header .get-started .btn-logout {
         background-color: #7C4DFF;
         color: white;
         padding: 10px 25px;
@@ -60,58 +61,41 @@ const HeaderStyles = () => (
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s ease;
-        font-size: 1rem; /* Added for consistency */
-        text-decoration: none; /* Ensure no underline */
-        display: inline-block; /* Proper alignment */
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
       }
 
-      .header .get-started .btn-primary:hover {
+      .header .get-started .btn-primary:hover,
+      .header .get-started .btn-logout:hover {
         background-color: #6c40e0;
         box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      @media (max-width: 768px) {
-        .header {
-          flex-direction: column;
-          gap: 15px;
-          padding: 15px 20px;
-        }
-        
-        .header .header-right {
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .header .nav-links {
-          flex-direction: column;
-          gap: 10px;
-          align-items: center;
-        }
-
-        .header .get-started {
-          margin-top: 10px;
-        }
       }
     `}
   </style>
 );
 
 const Header = () => {
-  // Step 2: Initialize the navigate function
   const navigate = useNavigate();
+  const loggedIn = isLoggedIn();
 
-  // Step 3: Create a handler for the button click
   const handleGetStartedClick = () => {
-    // This will navigate the user to the signup page.
-    // You can change this to '/login' if you prefer.
-    navigate('/signup');
+    navigate("/signup");
+  };
+
+  const handleLogout = () => {
+    clearAuthToken();
+    navigate("/");
+    window.location.reload(); // to instantly update button
   };
 
   return (
     <>
       <HeaderStyles />
       <header className="header">
-        <div className="logo">Shesecure</div>
+        <div className="logo" onClick={() => navigate("/")}>
+          Shesecure
+        </div>
         <div className="header-right">
           <nav className="nav-links">
             <a href="#features">Features</a>
@@ -119,10 +103,15 @@ const Header = () => {
             <a href="#about">About</a>
           </nav>
           <div className="get-started">
-            {/* Step 4: Add the onClick event to the button */}
-            <button className="btn-primary" onClick={handleGetStartedClick}>
-              Get Started
-            </button>
+            {loggedIn ? (
+              <button className="btn-logout" onClick={handleLogout}>
+                Logout
+              </button>
+            ) : (
+              <button className="btn-primary" onClick={handleGetStartedClick}>
+                Get Started
+              </button>
+            )}
           </div>
         </div>
       </header>

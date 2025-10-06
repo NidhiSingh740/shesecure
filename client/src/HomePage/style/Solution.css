@@ -35,8 +35,8 @@
 
 .feature-card {
   background: #ffffff;
-  padding: 2.5rem 2rem;
-  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  border-radius: 5px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -54,7 +54,8 @@
 }
 
 .feature-card p {
-  color: #555;
+    color: #b8369a;
+
   line-height: 1.7;
 }
 

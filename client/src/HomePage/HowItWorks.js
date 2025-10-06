@@ -43,6 +43,7 @@ const HowItWorksStyles = () => (
           .step {
             display: flex;
             flex-direction: column;
+            
             align-items: center;
             max-width: 220px; /* Limits the width of each step */
           }
@@ -51,7 +52,8 @@ const HowItWorksStyles = () => (
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #d54ca0, #b8369a);
+             background: linear-gradient(90deg, #b8369a, #6a11cb);
+
             color: white;
             display: flex;
             justify-content: center;
