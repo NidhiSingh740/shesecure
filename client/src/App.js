@@ -12,7 +12,9 @@ import CTA from './HomePage/CTA';
 import Signup from './Pages/Signup';
 import Login from './Pages/Login';
 import Logout from './Pages/Logout';
-// import Dashboard from './Pages/Dashboard';
+import MapView from './components/MapView';
+import TripStatusPanel from './components/TripStatusPanel';
+import Dashboard from './Pages/Dashboard';
 
 const LandingPage = () => (
   <>
@@ -35,7 +37,11 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
-            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/mapview" element={<MapView />} />
+            <Route path="/tripstatus" element={<TripStatusPanel />} />
+
+
           </Routes>
         </main>
         <Footer />

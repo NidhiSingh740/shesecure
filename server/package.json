@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@react-google-maps/api": "^2.20.7",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -8,10 +9,9 @@
     "mongoose": "^8.19.0"
   },
   "scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-}
-,
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "devDependencies": {
     "nodemon": "^3.1.10"
   }
