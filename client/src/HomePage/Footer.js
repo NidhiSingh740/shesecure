@@ -129,7 +129,7 @@ const Footer = () => {
       <footer className="site-footer">
         <div className="footer-container">
           <div className="footer-about">
-            <h3>SafeWalk</h3>
+            <h3>Shesecure</h3>
             <p>
               Your personal safety companion, powered by AI to provide intelligent protection and instant peace of mind.
             </p>

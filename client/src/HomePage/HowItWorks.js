@@ -126,7 +126,7 @@ const HowItWorks = () => {
       <HowItWorksStyles />
       <section className="how-it-works-section">
         <div className="how-it-works-container">
-          <h2>How SafeWalk Works</h2>
+          <h2>How Shesecure Works</h2>
           <p className="section-subtitle">
             Simple setup, intelligent protection, instant response.
           </p>

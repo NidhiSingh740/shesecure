@@ -1,114 +1,105 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const containerStyle = {
-  width: '100%',
-  height: '100%'
+// --- STYLE & SCRIPT LOADER FUNCTIONS ---
+// To resolve the build errors, we will load the Leaflet library directly from a CDN
+// instead of using npm imports. This is a robust method that works in any environment.
+
+// Injects the required Leaflet CSS into the document's head
+const loadLeafletCSS = () => {
+  if (!document.getElementById('leaflet-css')) {
+    const link = document.createElement('link');
+    link.id = 'leaflet-css';
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+    link.crossOrigin = '';
+    document.head.appendChild(link);
+  }
 };
 
-// A default center for the map before we get the user's location
-const defaultCenter = {
-  lat: 26.7606, // Example: Gorakhpur
-  lng: 83.3732
-};
-
-// This function dynamically loads the Google Maps script into the document
-const loadGoogleMapsScript = (apiKey, callback) => {
-  // Check if the script is already loaded or being loaded
-  if (window.google && window.google.maps) {
+// Injects the Leaflet JavaScript library and calls a function when it's ready
+const loadLeafletScript = (callback) => {
+  if (window.L) { // Check if Leaflet is already loaded
     callback();
     return;
   }
-  const existingScript = document.getElementById('googleMapsScript');
-  if (existingScript) {
-    existingScript.addEventListener('load', callback);
-    return;
-  }
-  
   const script = document.createElement('script');
-  script.id = 'googleMapsScript';
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=maps`;
-  script.async = true;
-  script.defer = true;
-  script.addEventListener('load', callback);
+  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+  script.crossOrigin = '';
+  script.onload = () => callback();
   document.head.appendChild(script);
 };
 
+// --- MAIN MAPVIEW COMPONENT ---
 const MapView = ({ isTripActive }) => {
-  // useRef to hold the div element where the map will be rendered
-  const mapDivRef = useRef(null);
-  // useRef to hold the map instance to avoid re-renders
+  const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerInstanceRef = useRef(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState({ lat: 26.7606, lng: 83.3732 }); // Default: Gorakhpur
 
-  const [isMapReady, setMapReady] = useState(false);
-  const [currentPosition, setCurrentPosition] = useState(defaultCenter);
-
-  // Effect 1: Load the Google Maps script once
+  // Effect 1: Load CSS and the Leaflet script
   useEffect(() => {
-    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      console.error("Fatal Error: Google Maps API key is missing from .env file.");
-      return;
-    }
-    loadGoogleMapsScript(apiKey, () => {
-      setMapReady(true);
+    loadLeafletCSS();
+    loadLeafletScript(() => {
+      setIsMapReady(true);
     });
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
-  // Effect 2: Get and update the user's current location
+  // Effect 2: Get user's current location
   useEffect(() => {
-    if (navigator.geolocation) {
-      // In a real app with live tracking, you would use navigator.geolocation.watchPosition
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCurrentPosition({ lat: latitude, lng: longitude });
-        },
-        () => {
-          console.error("Error getting user location. Defaulting to center.");
-          setCurrentPosition(defaultCenter);
-        }
-      );
-    }
-  }, [isTripActive]); // This effect re-runs when the trip starts or ends
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newPos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setCurrentPosition(newPos);
+      },
+      () => console.error("Could not get user's location.")
+    );
+  }, [isTripActive]);
 
-  // Effect 3: Initialize the map and update the marker when position changes
+  // Effect 3: Initialize the map and marker, and update them when the position changes.
   useEffect(() => {
-    // Do nothing until the script is ready and the div is available
-    if (!isMapReady || !mapDivRef.current) {
-      return;
-    }
-    
-    // If the map instance doesn't exist, create it
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = new window.google.maps.Map(mapDivRef.current, {
-        center: currentPosition,
-        zoom: 15,
-        disableDefaultUI: true,
-        zoomControl: true,
-      });
-    } else {
-      // If it exists, just pan to the new center
-      mapInstanceRef.current.panTo(currentPosition);
-    }
-    
-    // If the marker doesn't exist, create it
-    if (!markerInstanceRef.current) {
-      markerInstanceRef.current = new window.google.maps.Marker({
-        position: currentPosition,
-        map: mapInstanceRef.current,
-      });
-    } else {
-      // If it exists, just update its position
-      markerInstanceRef.current.setPosition(currentPosition);
-    }
-  }, [isMapReady, currentPosition]); // This effect re-runs when the map is ready or the position changes
+    // Only run this if the script is loaded and the container div exists
+    if (isMapReady && mapContainerRef.current) {
+      const L = window.L; // Leaflet is now available on the window object
 
-  return isMapReady ? (
-    // This div is where the Google Map will be rendered
-    <div ref={mapDivRef} style={containerStyle} />
-  ) : (
-    <div style={{ padding: '1rem', textAlign: 'center' }}>Loading Map...</div>
+      // If the map hasn't been created yet, initialize it.
+      if (!mapInstanceRef.current) {
+        mapInstanceRef.current = L.map(mapContainerRef.current).setView([currentPosition.lat, currentPosition.lng], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mapInstanceRef.current);
+        
+        // Create a custom icon to avoid issues with default icon paths
+        const customIcon = new L.Icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+        
+        markerInstanceRef.current = L.marker([currentPosition.lat, currentPosition.lng], { icon: customIcon }).addTo(mapInstanceRef.current);
+
+      } else {
+        // If the map already exists, just update the view and marker position.
+        mapInstanceRef.current.setView([currentPosition.lat, currentPosition.lng]);
+        markerInstanceRef.current.setLatLng([currentPosition.lat, currentPosition.lng]);
+      }
+    }
+  }, [isMapReady, currentPosition]); // Re-run this effect when map is ready or position changes
+
+  return (
+    <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }}>
+      {!isMapReady && <p style={{ textAlign: 'center', paddingTop: '2rem' }}>Loading Map...</p>}
+    </div>
   );
 };
 

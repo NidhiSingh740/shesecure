@@ -1,119 +1,106 @@
-/* --- Main Dashboard Layout --- */
-.dashboard-container {
+/* --- Main Layout --- */
+.dashboard-layout {
   display: flex;
-  flex-direction: column;
-  /* Full viewport height minus the header (assuming header is ~70px) */
-  height: calc(100vh - 70px); 
-  background-color: #f0f2f5;
+  height: calc(100vh - 70px); /* Full height minus header */
+  background-color: #f3f4f6;
 }
 
-.map-area {
-  flex-grow: 1; /* This makes the map take up all available vertical space */
-  background-color: #e0e0e0; /* A placeholder color while the map loads */
+.map-column {
+  flex: 3; /* Map takes up 3 parts of the space */
+  background-color: #e5e7eb; /* Fallback color */
 }
 
-.controls-area {
-  flex-shrink: 0; /* Prevents this area from shrinking */
-  padding: 1.5rem;
+.controls-column {
+  flex: 2; /* Controls take up 2 parts of the space */
   background-color: #ffffff;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  z-index: 10;
-}
-
-
-/* --- "Before Trip" View Styles --- */
-.before-trip-controls {
+  padding: 1.5rem 2rem;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+}
+
+/* --- Generic Panel Styles --- */
+.panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #111827;
+}
+
+.manage-link {
+  text-decoration: none;
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+/* --- Contacts Panel Styles --- */
+.contact-list {
+  flex-grow: 1; /* Takes available space */
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
   gap: 1rem;
 }
 
-.destination-input {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  box-sizing: border-box;
+.contact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e0e7ff;
+  color: #4338ca;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
 }
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+}
+.contact-details strong { font-size: 1rem; color: #1f2937; }
+.contact-details span { font-size: 0.875rem; color: #6b7280; }
 
 .start-trip-button {
   width: 100%;
   padding: 1rem;
+  margin-top: 1rem;
   font-size: 1.1rem;
   font-weight: bold;
   color: white;
-  background-color: #6366f1; /* Your primary purple color */
+  background-color: #6366f1;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
+.start-trip-button:hover { background-color: #4f46e5; }
+.error-text, .empty-text { color: #6b7280; }
 
-.start-trip-button:hover {
-  background-color: #4f46e5;
-}
-
-
-/* --- "During Trip" View Styles (TripStatusPanel) --- */
-.trip-status-panel {
-  text-align: center;
-}
-
-.trip-status-panel h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #1f2937;
-}
-
-.timer {
-  margin-bottom: 1.5rem;
-}
-
-.timer p {
-  margin: 0;
-  color: #6b7280;
-  font-size: 0.9rem;
-}
-
-.timer span {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #111827;
-  letter-spacing: 2px;
-}
-
-.trip-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.share-trip-button,
-.end-trip-button {
-  flex: 1;
-  padding: 0.8rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.share-trip-button {
-  background-color: #e0e7ff;
-  color: #4f46e5;
-  border: 1px solid #c7d2fe;
-}
-
-.end-trip-button {
-  background-color: #ef4444; /* A clear, friendly red */
-  color: white;
-  border: none;
-}
-
-.end-trip-button:hover {
-  background-color: #dc2626;
-}
+/* --- Trip Status Panel Styles --- */
+.status-title { text-align: center; font-size: 1.5rem; color: #111827; margin-bottom: 2rem; }
+.timer-display { text-align: center; margin: auto; }
+.timer-display p { margin: 0; color: #6b7280; font-size: 1rem; letter-spacing: 1px; }
+.timer-display span { font-size: 4rem; font-weight: bold; color: #111827; line-height: 1; }
+.trip-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+.share-button, .end-trip-button { flex: 1; padding: 1rem; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; }
+.share-button { background-color: #f3f4f6; color: #1f2937; }
+.end-trip-button { background-color: #ef4444; color: white; }
 
