@@ -52,6 +52,7 @@ const DashboardStyles = () => (
 );
 
 // --- DYNAMIC SCRIPT LOADERS ---
+// This robust approach loads Leaflet's CSS and JS from a CDN, bypassing build errors.
 const loadLeafletCSS = () => {
   if (!document.getElementById('leaflet-css')) {
     const link = document.createElement('link');
@@ -63,7 +64,7 @@ const loadLeafletCSS = () => {
 };
 
 const loadLeafletScript = (callback) => {
-  if (window.L) {
+  if (window.L) { // Check if Leaflet is already loaded
     callback();
     return;
   }
@@ -83,60 +84,66 @@ const MapView = ({ userPosition, destination }) => {
   const destMarkerRef = useRef(null);
   const polylineRef = useRef(null);
 
+  // This effect runs when the component mounts and when user/destination positions change
   useEffect(() => {
-    if (mapContainerRef.current && !mapInstanceRef.current && window.L) {
+    // Only proceed if the map container div exists and the Leaflet library (window.L) is ready
+    if (mapContainerRef.current && window.L) {
       const L = window.L;
-      mapInstanceRef.current = L.map(mapContainerRef.current).setView([userPosition.lat, userPosition.lng], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(mapInstanceRef.current);
-    }
-  }, [userPosition]);
 
-  useEffect(() => {
-    if (mapInstanceRef.current && window.L) {
-        const L = window.L;
-        if (!userMarkerRef.current) {
-            userMarkerRef.current = L.marker([userPosition.lat, userPosition.lng]).addTo(mapInstanceRef.current);
+      // If the map instance hasn't been created yet, initialize it
+      if (!mapInstanceRef.current) {
+        mapInstanceRef.current = L.map(mapContainerRef.current).setView([userPosition.lat, userPosition.lng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mapInstanceRef.current);
+      }
+
+      // --- Update User Marker ---
+      if (!userMarkerRef.current) {
+        userMarkerRef.current = L.marker([userPosition.lat, userPosition.lng]).addTo(mapInstanceRef.current);
+      } else {
+        userMarkerRef.current.setLatLng([userPosition.lat, userPosition.lng]);
+      }
+
+      // --- Update Destination Marker ---
+      if (destination) {
+        if (!destMarkerRef.current) {
+          destMarkerRef.current = L.marker([destination.lat, destination.lon]).addTo(mapInstanceRef.current);
         } else {
-            userMarkerRef.current.setLatLng([userPosition.lat, userPosition.lng]);
+          destMarkerRef.current.setLatLng([destination.lat, destination.lon]);
         }
+      } else if (destMarkerRef.current) { // If no destination, remove the marker
+        destMarkerRef.current.remove();
+        destMarkerRef.current = null;
+      }
 
-        if (destination) {
-            if (!destMarkerRef.current) {
-                destMarkerRef.current = L.marker([destination.lat, destination.lon]).addTo(mapInstanceRef.current);
-            } else {
-                destMarkerRef.current.setLatLng([destination.lat, destination.lon]);
-            }
-        } else if (destMarkerRef.current) {
-            destMarkerRef.current.remove();
-            destMarkerRef.current = null;
+      // --- Update Polyline and Map Bounds ---
+      if (destination) {
+        const latlngs = [[userPosition.lat, userPosition.lng], [destination.lat, destination.lon]];
+        if (!polylineRef.current) {
+          polylineRef.current = L.polyline(latlngs, { color: '#4f46e5' }).addTo(mapInstanceRef.current);
+        } else {
+          polylineRef.current.setLatLngs(latlngs);
         }
-
-        if (destination) {
-             const latlngs = [[userPosition.lat, userPosition.lng], [destination.lat, destination.lon]];
-            if(!polylineRef.current) {
-                polylineRef.current = L.polyline(latlngs, {color: '#4f46e5'}).addTo(mapInstanceRef.current);
-            } else {
-                polylineRef.current.setLatLngs(latlngs);
-            }
-            mapInstanceRef.current.fitBounds(latlngs, {padding: [50, 50]});
-        } else if (polylineRef.current) {
-            polylineRef.current.remove();
-            polylineRef.current = null;
-            mapInstanceRef.current.setView([userPosition.lat, userPosition.lng], 13);
-        }
-
+        // Adjust the map view to show both points
+        mapInstanceRef.current.fitBounds(latlngs, { padding: [50, 50] });
+      } else if (polylineRef.current) { // If no destination, remove the line
+        polylineRef.current.remove();
+        polylineRef.current = null;
+        // Recenter on the user
+        mapInstanceRef.current.setView([userPosition.lat, userPosition.lng], 13);
+      }
     }
-  }, [userPosition, destination]);
+  }, [userPosition, destination]); // This effect re-runs whenever the user or destination changes
 
   return <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
+
 const BeforeTripPanel = ({ contacts, loading, error, searchTerm, setSearchTerm, onSearch, isSearching, searchResults, onSelectDestination, selectedDestination, onStartTrip, searchError }) => (
     <div className="panel-container">
         <div className="trip-planning-module">
-        
+          <h3>Start a New Trip</h3>
           <div className="destination-form">
             <label>Where are you going?</label>
             <div className="search-input-group">
@@ -181,10 +188,26 @@ const BeforeTripPanel = ({ contacts, loading, error, searchTerm, setSearchTerm, 
     </div>
 );
 const TripStatusPanel = ({ tripDetails, onEndTrip }) => {
+    const [elapsedTime, setElapsedTime] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setElapsedTime(Math.floor((new Date() - tripDetails.startTime) / 1000));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [tripDetails]);
+
+    const formatTime = (totalSeconds) => {
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    };
+
     return (
         <div className="panel-container">
             <h3 className="status-title">Trip in Progress</h3>
-            <div className="timer-display"><p>ELAPSED TIME</p><span>00:00:00</span></div>
+            <div className="timer-display"><p>ELAPSED TIME</p><span>{formatTime(elapsedTime)}</span></div>
             <div className="trip-actions"><button className="share-button">Share Link</button><button className="end-trip-button" onClick={onEndTrip}>End Trip</button></div>
         </div>
     );
@@ -206,20 +229,25 @@ const Dashboard = () => {
   const [userPosition, setUserPosition] = useState({ lat: 26.7606, lng: 83.3732 });
   const [searchError, setSearchError] = useState('');
   
+  // This effect loads the Leaflet CSS and JS from a CDN
   useEffect(() => {
     loadLeafletCSS();
     loadLeafletScript(() => setIsLeafletReady(true));
   }, []);
 
+  // This effect gets the user's location and fetches their contacts
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude }),
       () => setError("Could not get user's location.")
     );
-    // Fetch contacts logic can be re-added here if needed
+
+    const fetchContacts = async () => {
+      // Your contact fetching logic goes here
+    };
+    fetchContacts();
   }, []);
 
-  // --- THIS IS THE CORRECTED AND COMPLETE SEARCH LOGIC ---
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     setIsSearching(true);
@@ -228,37 +256,29 @@ const Dashboard = () => {
     try {
       const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`);
       if (response.data.length === 0) {
-        setSearchError('No results found for that location.');
+        setSearchError('No results found.');
       }
       setSearchResults(response.data);
     } catch (err) {
-      setSearchError('Search failed. Check your network connection.');
-      console.error("Nominatim search error:", err);
+      setSearchError('Search failed. Check your network.');
     } finally {
       setIsSearching(false);
     }
   };
 
-  // --- THIS IS THE CORRECTED AND COMPLETE START TRIP LOGIC ---
   const handleStartTrip = () => {
-    if (!selectedDestination) {
-      alert("Please select a destination from the search results before starting a trip.");
-      return;
-    }
+    if (!selectedDestination) return;
     const newTrip = { id: `trip_${new Date().getTime()}`, startTime: new Date(), destination: selectedDestination };
     setTripDetails(newTrip);
     setIsTripActive(true);
-    alert("Your SafeWalk trip has started.");
   };
 
-  // --- THIS IS THE CORRECTED AND COMPLETE END TRIP LOGIC ---
   const handleEndTrip = () => {
     setIsTripActive(false);
     setTripDetails(null);
     setSelectedDestination(null);
     setSearchTerm('');
     setSearchResults([]);
-    alert("Your trip has safely ended.");
   };
 
   return (
@@ -279,7 +299,7 @@ const Dashboard = () => {
             <BeforeTripPanel
               contacts={contacts}
               loading={loading}
-              error={error} // This is for contacts, can be renamed to contactsError
+              error={error}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               onSearch={handleSearch}
@@ -288,7 +308,7 @@ const Dashboard = () => {
               onSelectDestination={setSelectedDestination}
               selectedDestination={selectedDestination}
               onStartTrip={handleStartTrip}
-              searchError={searchError} // Pass down the new search-specific error
+              searchError={searchError}
             />
           )}
         </div>

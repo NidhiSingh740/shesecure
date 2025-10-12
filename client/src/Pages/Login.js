@@ -132,9 +132,7 @@ const Login = () => {
         throw new Error(data.msg || "Invalid credentials");
       }
 
-      // ✅ Save token securely
-      saveAuthToken(data.token);
-      localStorage.setItem("userRole", data.role || "customer");
+    
 
       alert("Login successful!");
       navigate("/dashboard"); // adjust route as per your app

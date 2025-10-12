@@ -1,71 +1,49 @@
-
-// server/middleware/auth.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// ✅ Token verification middleware
-exports.protect = async function (req, res, next) {
-  const token = req.header('x-auth-token');
+// This function protects routes that require a user to be logged in.
+exports.protect = async (req, res, next) => {
+  console.log('--- "Protect" Middleware Activated ---');
+  let token;
+
+  // 1. Check for the token in the header
+  if (req.header('x-auth-token')) {
+    token = req.header('x-auth-token');
+    console.log('✅ Token found in header.');
+  }
 
   if (!token) {
+    console.log('❌ ERROR: No token found. Denying access.');
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
   try {
+    // 2. Check if the JWT_SECRET_KEY is loaded
+    if (!process.env.JWT_SECRET_KEY) {
+        console.log('❌ FATAL ERROR: JWT_SECRET_KEY is not defined in .env file!');
+        return res.status(500).json({ msg: 'Server configuration error.' });
+    }
+    console.log('✅ JWT_SECRET_KEY is loaded.');
+
+    // 3. Verify the token
+    console.log('Verifying token...');
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const user = await User.findById(decoded.user.id).select('-password');
+    console.log('✅ Token is valid. Decoded user ID:', decoded.user.id);
 
-    if (!user) {
-      return res.status(404).json({ msg: 'User not found.' });
+    // 4. Find the user in the database
+    req.user = await User.findById(decoded.user.id).select('-password');
+
+    if (!req.user) {
+      console.log('❌ ERROR: User from token not found in database. Denying access.');
+      return res.status(401).json({ msg: 'Authorization denied, user not found' });
     }
-
-    req.user = user; // Attach full user object to request
-    next();
+    
+    console.log('✅ User found in database. Granting access.');
+    console.log('--- Middleware finished ---');
+    next(); // Success! Proceed to the route.
   } catch (err) {
-    console.error('Token verification failed:', err.message);
+    console.log('❌ TOKEN VERIFICATION FAILED:', err.message);
     res.status(401).json({ msg: 'Token is not valid' });
-  }   
-};
-
-// ✅ Role-based access control middleware                  
-exports.authorize = (...roles) => {
-  return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({
-        msg: `Access denied: Role '${req.user ? req.user.role : 'Unknown'}' not authorized.`,
-      });
-    }
-    next();
-  };
-};
-
-// ✅ Optional: Specific role check middlewares
-exports.isCustomer = (req, res, next) => {
-  if (!req.user || req.user.role !== 'customer') {
-    return res.status(403).json({ msg: 'Access denied: Customers only' });
   }
-  next();
 };
-
-exports.isTailor = (req, res, next) => {
-  if (!req.user || req.user.role !== 'tailor') {
-    return res.status(403).json({ msg: 'Access denied: Tailors only' });
-  }
-  next();
-};
-
-exports.isStaff = (req, res, next) => {
-  if (!req.user || req.user.role !== 'staff') {
-    return res.status(403).json({ msg: 'Access denied: Staff only' });
-  }
-  next();
-};
-
-exports.isAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ msg: 'Access denied: Admins only' });
-  }
-  next();
-};
-
 

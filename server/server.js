@@ -1,8 +1,14 @@
 const express = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
 const cors = require('cors');
+
+// --- Route Imports ---
 const authRoutes = require('./routes/auth');
-require('dotenv').config();
+const contactRoutes = require('./routes/contacts');
+
+// --- PROOF THAT THIS FILE IS LOADED ---
+console.log("✅ Loading the CORRECT server.js file with contact routes enabled.");
 
 const app = express();
 
@@ -11,20 +17,18 @@ app.use(cors());
 app.use(express.json());
 
 // --- Database Connection ---
-const dbURI = "mongodb+srv://princessnidhi229:nikki2209@cluster0.nex2box.mongodb.net/ai-health?retryWrites=true&w=majority&appName=Cluster0";
-
-// CORRECTED LINE: The deprecated options have been removed.
+const dbURI = process.env.MONGODB_URI;
 mongoose.connect(dbURI)
-  .then(() => console.log('Successfully connected to MongoDB Atlas!'))
+  .then(() => console.log('Successfully connected to MongoDB!'))
   .catch((err) => console.error('Database connection error:', err));
 
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
-
+app.use('/api/contacts', contactRoutes); // This line is correct
 
 // --- Start the Server ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Backend server is running on port ${PORT}`);
 });
 

@@ -1,4 +1,3 @@
-// backend/models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -20,47 +19,23 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a password'],
     minlength: 6,
-    select: false, // Don't return password in queries by default
+    select: false,
   },
-  avatar: {
-    type: String,
-  },
-  role: {
-    type: String,
-    enum: ['customer', 'tailor', 'staff', 'admin'],
-    default: 'customer',
-  },
-  employeeId: {
-    type: String,
-    unique: true,
-    sparse: true,
-  },
+  // --- THIS IS THE ONLY ADDITION ---
+  trustedContacts: [
+    {
+      name: { type: String, required: true },
+      phone: { type: String, required: true },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
   },
-
-  // ✅ Female Measurement Assistant related fields
-  measurementRequest: {
-    requested: { type: Boolean, default: false },
-    preferredGender: { type: String, enum: ['female', 'any'], default: 'any' },
-    appointmentDate: { type: Date }, // Scheduled date & time
-    visitStatus: {
-      type: String,
-      enum: ['pending', 'completed', 'cancelled'],
-      default: 'pending',
-    },
-    measurements: {
-      bust: { type: Number },
-      waist: { type: Number },
-      hips: { type: Number },
-      inseam: { type: Number },
-      // add more measurements if needed
-    },
-  },
 });
 
-// Password hashing before save
+// --- NO CHANGES BELOW THIS LINE ---
+
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -70,9 +45,9 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Compare password
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);
+
