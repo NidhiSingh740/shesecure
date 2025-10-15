@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { saveAuthToken } from "../utils/auth"; // ✅ make sure this exists
+import { saveAuthToken } from "../utils/auth"; // ✅ imported
 
-// --- Styles (can stay inline or move to CSS file) ---
 const LoginStyles = () => (
   <style>
     {`
@@ -132,12 +131,12 @@ const Login = () => {
         throw new Error(data.msg || "Invalid credentials");
       }
 
-    
+      // ✅ Save token properly
+      saveAuthToken(data.token);
 
       alert("Login successful!");
-      navigate("/dashboard"); // adjust route as per your app
-      window.location.reload(); // refresh header to update nav instantly
-
+      navigate("/dashboard");
+      window.location.reload(); // instantly update header button
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
     }

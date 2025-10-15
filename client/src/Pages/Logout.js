@@ -14,7 +14,7 @@ const Logout = () => {
   }, [navigate]);
 
   return (
-    <div style={{ textAlign: "center", padding: "5rem" }}>
+    <div style={{ textAlign: "center",  padding: "5rem" }}>
       <h2>Logging out...</h2>
     </div>
   );

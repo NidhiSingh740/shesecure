@@ -1,3 +1,5 @@
+// src/Homepage/Header.js
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { isLoggedIn, clearAuthToken } from "../utils/auth";
@@ -53,7 +55,7 @@ const HeaderStyles = () => (
 
       .header .get-started .btn-primary,
       .header .get-started .btn-logout {
-        background-color: #7C4DFF;
+        background-color: #df2c14;
         color: white;
         padding: 10px 25px;
         border: none;

@@ -28,6 +28,9 @@ const LandingPage = () => (
   </>
 );
 
+
+
+
 function App() {
   return (
     <Router>
@@ -47,6 +50,7 @@ function App() {
               element={
                 <PrivateRoute>
                   <Dashboard />
+                 
                 </PrivateRoute>
               } 
             />

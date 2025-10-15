@@ -21,14 +21,17 @@ const DashboardStyles = () => (
     .destination-form label { font-weight: 600; color: #374151; display: block; margin-bottom: 0.5rem; }
     .search-input-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .search-input-group input { flex-grow: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
-    .search-input-group button { background-color: #4f46e5; color: white; border: none; border-radius: 8px; padding: 0 1rem; cursor: pointer; }
+    .search-input-group button {   background: linear-gradient(90deg, #b8369a, #6a11cb);
+ color: white; border: none; border-radius: 8px; padding: 0 1rem; cursor: pointer; }
     .results-section { margin-bottom: 1rem; max-height: 150px; overflow-y: auto; }
     .results-list { list-style: none; padding: 0; margin: 0; border: 1px solid #e5e7eb; border-radius: 8px; }
     .results-list li { padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; font-size: 0.9rem; }
     .results-list li:last-child { border-bottom: none; }
     .results-list li:hover { background-color: #f3f4f6; }
     .results-list li.selected { background-color: #e0e7ff; font-weight: bold; }
-    .start-trip-button { width: 100%; padding: 1rem; margin-top: 1rem; font-size: 1.1rem; font-weight: bold; color: white; background-color: #6366f1; border: none; border-radius: 8px; cursor: pointer; }
+    .start-trip-button { width: 100%; padding: 1rem; margin-top: 1rem; font-size: 1.1rem; font-weight: bold; color: white;     background: linear-gradient(90deg, #b669a4, #8d5ec1);
+
+ border: none; border-radius: 8px; cursor: pointer; }
     .start-trip-button:disabled { background-color: #a5b4fc; cursor: not-allowed; }
     .search-error { color: #ef4444; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 1rem; }
 
@@ -143,7 +146,7 @@ const MapView = ({ userPosition, destination }) => {
 const BeforeTripPanel = ({ contacts, loading, error, searchTerm, setSearchTerm, onSearch, isSearching, searchResults, onSelectDestination, selectedDestination, onStartTrip, searchError }) => (
     <div className="panel-container">
         <div className="trip-planning-module">
-          <h3>Start a New Trip</h3>
+        
           <div className="destination-form">
             <label>Where are you going?</label>
             <div className="search-input-group">

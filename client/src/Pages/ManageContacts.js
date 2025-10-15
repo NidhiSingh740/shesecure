@@ -8,7 +8,8 @@ const ManageContactsStyles = () => (
   <style>{`
     .contacts-container {
         padding: 100px 2rem 2rem 2rem;
-        background-color: #f9fafb;
+                 background: linear-gradient(135deg, rgb(247, 240, 243), rgb(232, 227, 239));
+
         min-height: calc(100vh - 70px);
     }
 
@@ -24,7 +25,8 @@ const ManageContactsStyles = () => (
     .contacts-wrapper h2 {
         text-align: center;
         font-size: 2.2rem;
-        color: #1f2937;
+          color: #b8369a;
+
         margin-top: 0;
         margin-bottom: 0.5rem;
     }
@@ -54,7 +56,8 @@ const ManageContactsStyles = () => (
 
     .add-contact-form h3, .contact-list h3 {
         font-size: 1.4rem;
-        color: #374151;
+                 color: #b8369a;
+
         margin-top: 0;
         margin-bottom: 1.5rem;
         border-bottom: 1px solid #e5e7eb;
@@ -78,7 +81,8 @@ const ManageContactsStyles = () => (
         padding: 0.8rem;
         border: none;
         border-radius: 8px;
-        background-color: #4f46e5;
+          background: linear-gradient(90deg, #b8369a, #6a11cb);
+
         color: white;
         font-weight: 600;
         cursor: pointer;
