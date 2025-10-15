@@ -1,0 +1,26 @@
+
+.track-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.track-header {
+  padding: 1rem 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  text-align: center;
+}
+.track-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #111827;
+}
+.track-header p {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+}
+.track-header .active { color: #16a34a; font-weight: bold; }
+.track-header .ended { color: #dc2626; font-weight: bold; }
+.error-text { text-align: center; padding: 2rem; color: #dc2626; }

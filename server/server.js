@@ -2,33 +2,78 @@ const express = require('express');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const cors = require('cors');
+const http = require('http'); // Required for Socket.IO
+const { Server } = require("socket.io"); // Required for Socket.IO
 
-// --- Route Imports ---
+// Route imports
 const authRoutes = require('./routes/auth');
 const contactRoutes = require('./routes/contacts');
+const tripRoutes = require('./routes/trips'); // Import the new trip routes
 
-// --- PROOF THAT THIS FILE IS LOADED ---
-console.log("✅ Loading the CORRECT server.js file with contact routes enabled.");
+// Model imports for Socket.IO logic
+const Trip = require('./models/Trip');
 
 const app = express();
+const server = http.createServer(app); // Create an HTTP server from the Express app
 
-// --- Middleware ---
+// Initialize Socket.IO and attach it to the server
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Your React app's address
+    methods: ["GET", "POST"]
+  }
+});
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// --- Database Connection ---
+// Database Connection
 const dbURI = process.env.MONGODB_URI;
 mongoose.connect(dbURI)
-  .then(() => console.log('Successfully connected to MongoDB!'))
-  .catch((err) => console.error('Database connection error:', err));
+  .then(() => console.log('✅ Successfully connected to MongoDB!'))
+  .catch((err) => console.error('❌ Database connection error:', err));
 
-// --- API Routes ---
+// API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/contacts', contactRoutes); // This line is correct
+app.use('/api/contacts', contactRoutes);
+app.use('/api/trips', tripRoutes); // Use the new trip routes
 
-// --- Start the Server ---
+// --- Socket.IO Real-Time Logic ---
+io.on('connection', (socket) => {
+  console.log('🔌 A user connected:', socket.id);
+
+  // When a user starts a trip, they should join a room for that trip
+  socket.on('joinTripRoom', (tripId) => {
+    socket.join(tripId);
+    console.log(`User ${socket.id} joined room ${tripId}`);
+  });
+
+  // Listen for location updates from the user on a trip
+  socket.on('updateLocation', async ({ tripId, coordinates }) => {
+    try {
+      const trip = await Trip.findById(tripId);
+      if (trip && trip.isActive) {
+        // Add the new location to the path
+        trip.path.push({ lat: coordinates.lat, lng: coordinates.lng });
+        await trip.save();
+
+        // Broadcast the new location to everyone in the trip room (i.e., trusted contacts)
+        io.to(tripId).emit('tripUpdate', coordinates);
+      }
+    } catch (error) {
+      console.error('Error updating location:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔥 A user disconnected:', socket.id);
+  });
+});
+
+// Start the Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Backend server is running on port ${PORT}`);
+server.listen(PORT, () => { // Use server.listen instead of app.listen
+  console.log(`✅ Backend server with Socket.IO is running on port ${PORT}`);
 });
 

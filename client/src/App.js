@@ -17,6 +17,7 @@ import Dashboard from './Pages/Dashboard';
 import ManageContacts from './Pages/ManageContacts';
 // Import the security component
 import PrivateRoute from './components/PrivateRoute';
+import TrackTripPage from './Pages/TrackTripPage';
 
 const LandingPage = () => (
   <>
@@ -43,7 +44,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
-            
+            <Route path="/track/:tripId" element={<TrackTripPage />} />
                                                                                                    {/* --- Protected Routes --- */}
             <Route 
               path="/dashboard"

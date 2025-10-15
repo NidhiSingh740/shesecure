@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-// --- STYLES (Self-Contained) ---
-// By embedding the styles here, we guarantee they are loaded and applied correctly.
+// --- STYLES (Self-Contained for Stability) ---
 const DashboardStyles = () => (
   <style>{`
     /* --- Main Layout --- */
@@ -21,19 +20,14 @@ const DashboardStyles = () => (
     .destination-form label { font-weight: 600; color: #374151; display: block; margin-bottom: 0.5rem; }
     .search-input-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .search-input-group input { flex-grow: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
-    .search-input-group button {   background: linear-gradient(90deg, #b8369a, #6a11cb);
- color: white; border: none; border-radius: 8px; padding: 0 1rem; cursor: pointer; }
+    .search-input-group button { background: linear-gradient(90deg, #b8369a, #6a11cb); color: white; border: none; border-radius: 8px; padding: 0 1rem; cursor: pointer; }
     .results-section { margin-bottom: 1rem; max-height: 150px; overflow-y: auto; }
     .results-list { list-style: none; padding: 0; margin: 0; border: 1px solid #e5e7eb; border-radius: 8px; }
     .results-list li { padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; font-size: 0.9rem; }
-    .results-list li:last-child { border-bottom: none; }
-    .results-list li:hover { background-color: #f3f4f6; }
     .results-list li.selected { background-color: #e0e7ff; font-weight: bold; }
-    .start-trip-button { width: 100%; padding: 1rem; margin-top: 1rem; font-size: 1.1rem; font-weight: bold; color: white;     background: linear-gradient(90deg, #b669a4, #8d5ec1);
-
- border: none; border-radius: 8px; cursor: pointer; }
-    .start-trip-button:disabled { background-color: #a5b4fc; cursor: not-allowed; }
-    .search-error { color: #ef4444; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 1rem; }
+    .start-trip-button { width: 100%; padding: 1rem; margin-top: 1rem; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(90deg, #b669a4, #8d5ec1); border: none; border-radius: 8px; cursor: pointer; }
+    .start-trip-button:disabled { background: #c4b5fd; cursor: not-allowed; }
+    .search-error, .error-text { color: #ef4444; }
 
     /* --- Contacts Module --- */
     .contacts-module { flex-grow: 1; margin-top: 2rem; overflow-y: auto; }
@@ -41,7 +35,6 @@ const DashboardStyles = () => (
     .contact-item { display: flex; align-items: center; padding: 0.75rem 0; gap: 1rem; }
     .contact-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #e0e7ff; color: #4338ca; display: grid; place-items: center; font-weight: bold; }
     .contact-details { display: flex; flex-direction: column; }
-    .error-text { color: #ef4444; }
 
     /* --- Trip Status Panel --- */
     .status-title { text-align: center; font-size: 1.5rem; }
@@ -54,8 +47,7 @@ const DashboardStyles = () => (
   `}</style>
 );
 
-// --- DYNAMIC SCRIPT LOADERS ---
-// This robust approach loads Leaflet's CSS and JS from a CDN, bypassing build errors.
+// --- DYNAMIC SCRIPT LOADERS (Most Robust Method) ---
 const loadLeafletCSS = () => {
   if (!document.getElementById('leaflet-css')) {
     const link = document.createElement('link');
@@ -67,7 +59,7 @@ const loadLeafletCSS = () => {
 };
 
 const loadLeafletScript = (callback) => {
-  if (window.L) { // Check if Leaflet is already loaded
+  if (window.L) {
     callback();
     return;
   }
@@ -87,40 +79,28 @@ const MapView = ({ userPosition, destination }) => {
   const destMarkerRef = useRef(null);
   const polylineRef = useRef(null);
 
-  // This effect runs when the component mounts and when user/destination positions change
   useEffect(() => {
-    // Only proceed if the map container div exists and the Leaflet library (window.L) is ready
     if (mapContainerRef.current && window.L) {
       const L = window.L;
-
-      // If the map instance hasn't been created yet, initialize it
       if (!mapInstanceRef.current) {
         mapInstanceRef.current = L.map(mapContainerRef.current).setView([userPosition.lat, userPosition.lng], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(mapInstanceRef.current);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstanceRef.current);
       }
-
-      // --- Update User Marker ---
       if (!userMarkerRef.current) {
         userMarkerRef.current = L.marker([userPosition.lat, userPosition.lng]).addTo(mapInstanceRef.current);
       } else {
         userMarkerRef.current.setLatLng([userPosition.lat, userPosition.lng]);
       }
-
-      // --- Update Destination Marker ---
       if (destination) {
         if (!destMarkerRef.current) {
           destMarkerRef.current = L.marker([destination.lat, destination.lon]).addTo(mapInstanceRef.current);
         } else {
           destMarkerRef.current.setLatLng([destination.lat, destination.lon]);
         }
-      } else if (destMarkerRef.current) { // If no destination, remove the marker
+      } else if (destMarkerRef.current) {
         destMarkerRef.current.remove();
         destMarkerRef.current = null;
       }
-
-      // --- Update Polyline and Map Bounds ---
       if (destination) {
         const latlngs = [[userPosition.lat, userPosition.lng], [destination.lat, destination.lon]];
         if (!polylineRef.current) {
@@ -128,25 +108,22 @@ const MapView = ({ userPosition, destination }) => {
         } else {
           polylineRef.current.setLatLngs(latlngs);
         }
-        // Adjust the map view to show both points
         mapInstanceRef.current.fitBounds(latlngs, { padding: [50, 50] });
-      } else if (polylineRef.current) { // If no destination, remove the line
+      } else if (polylineRef.current) {
         polylineRef.current.remove();
         polylineRef.current = null;
-        // Recenter on the user
         mapInstanceRef.current.setView([userPosition.lat, userPosition.lng], 13);
       }
     }
-  }, [userPosition, destination]); // This effect re-runs whenever the user or destination changes
+  }, [userPosition, destination]);
 
   return <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
-
-const BeforeTripPanel = ({ contacts, loading, error, searchTerm, setSearchTerm, onSearch, isSearching, searchResults, onSelectDestination, selectedDestination, onStartTrip, searchError }) => (
+const BeforeTripPanel = ({ contacts, loading, contactsError, searchTerm, setSearchTerm, onSearch, isSearching, searchResults, onSelectDestination, selectedDestination, onStartTrip, searchError }) => (
     <div className="panel-container">
         <div className="trip-planning-module">
-        
+          <h3>Start a New Trip</h3>
           <div className="destination-form">
             <label>Where are you going?</label>
             <div className="search-input-group">
@@ -175,8 +152,8 @@ const BeforeTripPanel = ({ contacts, loading, error, searchTerm, setSearchTerm, 
           </div>
           <div className="contact-list">
             {loading && <p>Loading contacts...</p>}
-            {error && <p className="error-text">{error}</p>}
-            {!loading && !error && contacts.map(contact => (
+            {contactsError && <p className="error-text">{contactsError}</p>}
+            {!loading && !contactsError && contacts.map(contact => (
               <div key={contact._id} className="contact-item">
                 <div className="contact-avatar">{contact.name.charAt(0)}</div>
                 <div className="contact-details">
@@ -185,14 +162,13 @@ const BeforeTripPanel = ({ contacts, loading, error, searchTerm, setSearchTerm, 
                 </div>
               </div>
             ))}
-            {!loading && !error && contacts.length === 0 && <p>No contacts added yet.</p>}
+            {!loading && !contactsError && contacts.length === 0 && <p>No contacts added yet.</p>}
           </div>
         </div>
     </div>
 );
 const TripStatusPanel = ({ tripDetails, onEndTrip }) => {
     const [elapsedTime, setElapsedTime] = useState(0);
-
     useEffect(() => {
         const timer = setInterval(() => {
             setElapsedTime(Math.floor((new Date() - tripDetails.startTime) / 1000));
@@ -223,7 +199,7 @@ const Dashboard = () => {
   const [isTripActive, setIsTripActive] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [contactsError, setContactsError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedDestination, setSelectedDestination] = useState(null);
@@ -232,25 +208,38 @@ const Dashboard = () => {
   const [userPosition, setUserPosition] = useState({ lat: 26.7606, lng: 83.3732 });
   const [searchError, setSearchError] = useState('');
   
-  // This effect loads the Leaflet CSS and JS from a CDN
+  // Effect to load Leaflet CSS and JS
   useEffect(() => {
     loadLeafletCSS();
     loadLeafletScript(() => setIsLeafletReady(true));
   }, []);
 
-  // This effect gets the user's location and fetches their contacts
+  // Effect to get user's location and fetch contacts
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude }),
-      () => setError("Could not get user's location.")
+      () => setContactsError("Could not get user's location.")
     );
 
     const fetchContacts = async () => {
-      // Your contact fetching logic goes here
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Authorization failed.');
+        const res = await axios.get('http://localhost:5000/api/contacts', {
+          headers: { 'x-auth-token': token },
+        });
+        setContacts(res.data);
+      } catch (err) {
+        setContactsError('Could not load contacts.');
+      } finally {
+        setLoading(false);
+      }
     };
     fetchContacts();
   }, []);
 
+  // --- THIS IS THE CORRECT, FULLY IMPLEMENTED SEARCH LOGIC ---
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     setIsSearching(true);
@@ -259,29 +248,36 @@ const Dashboard = () => {
     try {
       const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`);
       if (response.data.length === 0) {
-        setSearchError('No results found.');
+        setSearchError('No results found for that location.');
       }
       setSearchResults(response.data);
     } catch (err) {
-      setSearchError('Search failed. Check your network.');
+      setSearchError('Search failed. Please check your network connection.');
     } finally {
       setIsSearching(false);
     }
   };
 
+  // --- THIS IS THE CORRECT, FULLY IMPLEMENTED START TRIP LOGIC ---
   const handleStartTrip = () => {
-    if (!selectedDestination) return;
+    if (!selectedDestination) {
+      alert("Please select a destination from the search results first.");
+      return;
+    }
     const newTrip = { id: `trip_${new Date().getTime()}`, startTime: new Date(), destination: selectedDestination };
     setTripDetails(newTrip);
     setIsTripActive(true);
+    alert("Your SafeWalk trip has started.");
   };
 
+  // --- THIS IS THE CORRECT, FULLY IMPLEMENTED END TRIP LOGIC ---
   const handleEndTrip = () => {
     setIsTripActive(false);
     setTripDetails(null);
     setSelectedDestination(null);
     setSearchTerm('');
     setSearchResults([]);
+    alert("Your trip has safely ended.");
   };
 
   return (
@@ -302,7 +298,7 @@ const Dashboard = () => {
             <BeforeTripPanel
               contacts={contacts}
               loading={loading}
-              error={error}
+              contactsError={contactsError}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               onSearch={handleSearch}
