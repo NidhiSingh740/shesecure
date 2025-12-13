@@ -67,7 +67,7 @@ const Signup = () => {
 
         try {
             // FIX: The request body is now simpler, with no 'role' field.
-            const response = await axios.post('http://localhost:5000/api/auth/signup', {
+            const response = await axios.post('172.18.24.204:5000/api/auth/signup', {
                 fullName,
                 email,
                 password,

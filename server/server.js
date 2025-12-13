@@ -19,7 +19,7 @@ const server = http.createServer(app); // Create an HTTP server from the Express
 // Initialize Socket.IO and attach it to the server
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Your React app's address
+    origin: "http://172.18.24.204:3000", // Your React app's address
     methods: ["GET", "POST"]
   }
 });

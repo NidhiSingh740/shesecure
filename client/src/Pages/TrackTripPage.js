@@ -89,7 +89,7 @@ const TrackTripPage = () => {
 
     const fetchTrip = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/trips/${tripId}`);
+        const res = await axios.get(`http://172.18.24.204:5000/api/trips/${tripId}`);
         setTrip(res.data);
         if (res.data.path.length > 0) {
           const lastPos = res.data.path[res.data.path.length - 1];
@@ -102,7 +102,7 @@ const TrackTripPage = () => {
 
     fetchTrip();
 
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io('172.18.24.204:5000');
     socketRef.current.emit('joinTripRoom', tripId);
     socketRef.current.on('tripUpdate', (newCoordinates) => {
       setLivePosition(newCoordinates);
