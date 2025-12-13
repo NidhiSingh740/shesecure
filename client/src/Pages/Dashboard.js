@@ -261,7 +261,7 @@ const Dashboard = () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Authorization failed.');
-        const res = await axios.get('172.18.24.204:5000/api/contacts', {
+        const res = await axios.get('http://172.18.24.204:5000/api/contacts', {
           headers: { 'x-auth-token': token },
         });
         setContacts(res.data);
@@ -273,7 +273,7 @@ const Dashboard = () => {
     };
     fetchContacts();
 
-    socketRef.current = io('172.18.24.204:5000');
+    socketRef.current = io('http://172.18.24.204:5000');
     return () => {
       if (socketRef.current) socketRef.current.disconnect();
       if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
@@ -306,7 +306,7 @@ const Dashboard = () => {
     const token = localStorage.getItem('token');
     
     try {
-        const res = await axios.post('172.18.24.204:5000/api/trips/start', {
+        const res = await axios.post('http://172.18.24.204:5000/api/trips/start', {
             destination: { 
                 name: selectedDestination.display_name, 
                 lat: selectedDestination.lat, 
