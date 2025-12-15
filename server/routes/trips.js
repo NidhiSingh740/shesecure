@@ -36,17 +36,42 @@ router.post('/start', protect, async (req, res) => {
 // @desc    Get trip details for the public tracking page
 // @access  Public
 router.get('/:tripId', async (req, res) => {
-    try {
-        const trip = await Trip.findById(req.params.tripId).populate('userId', 'fullName');
-        if (!trip) {
-            return res.status(404).json({ msg: 'Trip not found.' });
-        }
-        res.json(trip);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+  try {
+    const trip = await Trip.findById(req.params.tripId).populate('userId', 'fullName');
+    if (!trip) {
+      return res.status(404).json({ msg: 'Trip not found.' });
     }
+    res.json(trip);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
 });
 
+// @route   POST /api/trips/:tripId/end
+// @desc    End an active trip
+// @access  Private
+router.post('/:tripId/end', protect, async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.tripId);
+    if (!trip) {
+      return res.status(404).json({ msg: 'Trip not found' });
+    }
+
+    // Verify the user owns this trip
+    if (trip.userId.toString() !== req.user.id) {
+      return res.status(401).json({ msg: 'Not authorized' });
+    }
+
+    trip.isActive = false;
+    trip.endedAt = new Date();
+    await trip.save();
+
+    res.json({ msg: 'Trip ended successfully', trip });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 
 module.exports = router;

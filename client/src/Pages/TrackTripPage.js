@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
-const API_URL = 'http://172.18.24.204:5000'; // your backend URL
+const API_URL = 'http://localhost:5000'; // your backend URL
 
 const TrackTripPage = () => {
   const { tripId } = useParams();
@@ -17,6 +18,7 @@ const TrackTripPage = () => {
   const mapObj = useRef(null);
   const marker = useRef(null);
   const pollIntervalRef = useRef(null);
+  const socketRef = useRef(null);
 
   // load Leaflet JS + CSS from CDN
   const loadLeaflet = (cb) => {
@@ -56,7 +58,36 @@ const TrackTripPage = () => {
     });
   }, []);
 
-  // 2) Poll trip status every 3 seconds
+  // 2) Connect to Socket.IO for real-time updates
+  useEffect(() => {
+    // Connect to socket
+    socketRef.current = io(API_URL);
+
+    // Join the trip room to receive updates
+    socketRef.current.emit('joinTripRoom', tripId);
+
+    // Listen for real-time location updates
+    socketRef.current.on('tripUpdate', (coordinates) => {
+      setLivePos(coordinates);
+    });
+
+    // Listen for trip ended event - this is the key fix!
+    socketRef.current.on('tripEnded', () => {
+      console.log('🛑 Received tripEnded event from server');
+      setIsEnded(true);
+      // Stop polling since trip is ended
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    });
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+    };
+  }, [tripId]);
+
+  // 3) Poll trip status every 3 seconds (as fallback)
   useEffect(() => {
     const fetchTrip = async () => {
       try {
@@ -67,6 +98,12 @@ const TrackTripPage = () => {
         if (res.data.path && res.data.path.length > 0) {
           const last = res.data.path[res.data.path.length - 1];
           setLivePos(last);
+        }
+
+        // Stop polling if trip is already ended
+        if (!res.data.isActive && pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
         }
       } catch (err) {
         console.error('Polling error', err);
@@ -107,29 +144,29 @@ const TrackTripPage = () => {
 
   if (error) {
     return (
-      <div style={{height: '100vh', display:'flex', alignItems:'center', justifyContent:'center'}}>
-        <p style={{color:'red'}}>{error}</p>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'red' }}>{error}</p>
       </div>
     );
   }
 
   return (
-    <div style={{height: '100vh', display:'flex', flexDirection:'column'}}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div
         style={{
-          padding:'20px',
-          background:'white',
-          textAlign:'center',
-          boxShadow:'0 2px 5px rgba(0,0,0,0.1)',
-          zIndex:1000
+          padding: '20px',
+          background: 'white',
+          textAlign: 'center',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+          zIndex: 1000
         }}
       >
         <h2>Tracking {trip?.userId?.fullName || 'Trip'}</h2>
         {isEnded
-          ? <h3 style={{color:'red'}}>TRIP ENDED</h3>
-          : <h3 style={{color:'green'}}>TRIP IN PROGRESS</h3>}
+          ? <h3 style={{ color: 'red' }}>TRIP ENDED</h3>
+          : <h3 style={{ color: 'green' }}>TRIP IN PROGRESS</h3>}
       </div>
-      <div ref={mapRef} style={{flex:1}}></div>
+      <div ref={mapRef} style={{ flex: 1 }}></div>
     </div>
   );
 };

@@ -19,7 +19,7 @@ const server = http.createServer(app); // Create an HTTP server from the Express
 // Initialize Socket.IO and attach it to the server
 const io = new Server(server, {
   cors: {
-    origin: "http://172.18.24.204:3000", // Your React app's address
+    origin: "http://localhost:3000", // Your React app's address
     methods: ["GET", "POST"]
   }
 });
@@ -63,6 +63,24 @@ io.on('connection', (socket) => {
       }
     } catch (error) {
       console.error('Error updating location:', error);
+    }
+  });
+
+  // Listen for trip end from the traveler
+  socket.on('endTrip', async ({ tripId }) => {
+    try {
+      const trip = await Trip.findById(tripId);
+      if (trip) {
+        trip.isActive = false;
+        trip.endedAt = new Date();
+        await trip.save();
+
+        // Notify everyone in the trip room that the trip has ended
+        io.to(tripId).emit('tripEnded', { tripId });
+        console.log(`🛑 Trip ${tripId} ended and all trackers notified`);
+      }
+    } catch (error) {
+      console.error('Error ending trip:', error);
     }
   });
 

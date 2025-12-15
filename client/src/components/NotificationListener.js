@@ -56,7 +56,7 @@ const NotificationListener = () => {
 
   useEffect(() => {
     // 1. Connect to socket
-    const socket = io('172.18.24.204:5000');
+    const socket = io('http://localhost:5000');
 
     // 2. Listen for the 'receiveNotification' event from the server
     socket.on('receiveNotification', (data) => {
@@ -64,8 +64,8 @@ const NotificationListener = () => {
       try {
         const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         audio.play().catch(e => console.log("Audio play failed (user interaction needed)"));
-      } catch (e) {}
-      
+      } catch (e) { }
+
       setNotification(data);
     });
 
@@ -93,7 +93,7 @@ const NotificationListener = () => {
           TRACK LIVE LOCATION
         </button>
         <button className="dismiss-btn" onClick={() => setNotification(null)}>
-            Dismiss
+          Dismiss
         </button>
       </div>
     </>

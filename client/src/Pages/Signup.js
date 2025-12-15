@@ -67,12 +67,12 @@ const Signup = () => {
 
         try {
             // FIX: The request body is now simpler, with no 'role' field.
-            const response = await axios.post('172.18.24.204:5000/api/auth/signup', {
+            const response = await axios.post('http://localhost:5000/api/auth/signup', {
                 fullName,
                 email,
                 password,
             });
-            
+
             // Show a success alert and navigate immediately.
             alert(response.data.msg); // Shows "Registration successful! Please login."
             navigate('/login');
@@ -89,7 +89,7 @@ const Signup = () => {
                 <div className="auth-form-wrapper">
                     <h2>Create Your Account</h2>
                     <p className="auth-subtext">Join us and get started.</p>
-                    
+
                     {error && <p className="error-message">{error}</p>}
 
                     <form onSubmit={handleSubmit} className="auth-form">
@@ -126,7 +126,7 @@ const Signup = () => {
                                 required
                             />
                         </div>
-                        
+
                         <button type="submit" className="auth-button">Sign Up</button>
                     </form>
 

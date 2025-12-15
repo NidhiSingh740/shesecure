@@ -93,8 +93,8 @@ const MapView = ({ userPosition, destination }) => {
   useEffect(() => {
     if (mapInstanceRef.current && window.L) {
       const L = window.L;
-      if(userMarkerRef.current) userMarkerRef.current.setLatLng([userPosition.lat, userPosition.lng]);
-      
+      if (userMarkerRef.current) userMarkerRef.current.setLatLng([userPosition.lat, userPosition.lng]);
+
       if (destination) {
         if (!destMarkerRef.current) {
           destMarkerRef.current = L.marker([destination.lat, destination.lon]).addTo(mapInstanceRef.current);
@@ -108,7 +108,7 @@ const MapView = ({ userPosition, destination }) => {
         } else {
           polylineRef.current.setLatLngs(path);
         }
-        
+
         mapInstanceRef.current.fitBounds(path, { padding: [50, 50] });
       } else {
         if (destMarkerRef.current) { destMarkerRef.current.remove(); destMarkerRef.current = null; }
@@ -122,113 +122,113 @@ const MapView = ({ userPosition, destination }) => {
 
 // --- BEFORE TRIP PANEL ---
 const BeforeTripPanel = ({ contacts, loading, contactsError, searchTerm, setSearchTerm, onSearch, isSearching, searchResults, onSelectDestination, selectedDestination, onStartTrip, searchError }) => (
-    <div className="panel-container">
-        <div className="trip-planning-module">
-          <h3>Start a New Trip</h3>
-          <div className="destination-form">
-            <label>Where are you going?</label>
-            <div className="search-input-group">
-              <input type="text" placeholder="Search for a destination..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && onSearch()} />
-              <button onClick={onSearch} disabled={isSearching}>{isSearching ? '...' : 'Search'}</button>
-            </div>
-            {searchError && <p className="search-error">{searchError}</p>}
-            {searchResults.length > 0 && (
-              <div className="results-section">
-                <ul className="results-list">
-                  {searchResults.slice(0, 5).map((result) => (
-                    <li key={result.place_id} className={selectedDestination?.place_id === result.place_id ? 'selected' : ''} onClick={() => onSelectDestination(result)}>
-                      {result.display_name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <button className="start-trip-button" onClick={onStartTrip} disabled={!selectedDestination}>Start SafeWalk Trip</button>
-          </div>
+  <div className="panel-container">
+    <div className="trip-planning-module">
+      <h3>Start a New Trip</h3>
+      <div className="destination-form">
+        <label>Where are you going?</label>
+        <div className="search-input-group">
+          <input type="text" placeholder="Search for a destination..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && onSearch()} />
+          <button onClick={onSearch} disabled={isSearching}>{isSearching ? '...' : 'Search'}</button>
         </div>
-        <div className="contacts-module">
-          <div className="panel-header"><h3>Trusted Contacts</h3><Link to="/contacts" className="manage-link">Manage</Link></div>
-          <div className="contact-list">
-            {loading && <p>Loading contacts...</p>}
-            {contactsError && <p className="error-text">{contactsError}</p>}
-            {!loading && !contactsError && contacts.map(contact => (
-              <div key={contact._id} className="contact-item">
-                <div className="contact-avatar">{contact.name.charAt(0)}</div>
-                <div className="contact-details"><strong>{contact.name}</strong><span>{contact.phone}</span></div>
-              </div>
-            ))}
-            {!loading && !contactsError && contacts.length === 0 && <p>No contacts added yet.</p>}
+        {searchError && <p className="search-error">{searchError}</p>}
+        {searchResults.length > 0 && (
+          <div className="results-section">
+            <ul className="results-list">
+              {searchResults.slice(0, 5).map((result) => (
+                <li key={result.place_id} className={selectedDestination?.place_id === result.place_id ? 'selected' : ''} onClick={() => onSelectDestination(result)}>
+                  {result.display_name}
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
+        )}
+        <button className="start-trip-button" onClick={onStartTrip} disabled={!selectedDestination}>Start SafeWalk Trip</button>
+      </div>
     </div>
+    <div className="contacts-module">
+      <div className="panel-header"><h3>Trusted Contacts</h3><Link to="/contacts" className="manage-link">Manage</Link></div>
+      <div className="contact-list">
+        {loading && <p>Loading contacts...</p>}
+        {contactsError && <p className="error-text">{contactsError}</p>}
+        {!loading && !contactsError && contacts.map(contact => (
+          <div key={contact._id} className="contact-item">
+            <div className="contact-avatar">{contact.name.charAt(0)}</div>
+            <div className="contact-details"><strong>{contact.name}</strong><span>{contact.phone}</span></div>
+          </div>
+        ))}
+        {!loading && !contactsError && contacts.length === 0 && <p>No contacts added yet.</p>}
+      </div>
+    </div>
+  </div>
 );
 
 // --- TRIP STATUS PANEL (With FIXED WhatsApp Logic) ---
 const TripStatusPanel = ({ tripDetails, onEndTrip, contacts }) => {
-    const [time, setTime] = useState(0);
-    const [showModal, setShowModal] = useState(false);
+  const [time, setTime] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
-    useEffect(() => {
-        const start = tripDetails.startedAt ? new Date(tripDetails.startedAt) : new Date();
-        const i = setInterval(() => setTime(Math.floor((new Date() - start) / 1000)), 1000);
-        return () => clearInterval(i);
-    }, [tripDetails]);
+  useEffect(() => {
+    const start = tripDetails.startedAt ? new Date(tripDetails.startedAt) : new Date();
+    const i = setInterval(() => setTime(Math.floor((new Date() - start) / 1000)), 1000);
+    return () => clearInterval(i);
+  }, [tripDetails]);
 
-    const format = (s) => new Date(s * 1000).toISOString().substr(11, 8);
+  const format = (s) => new Date(s * 1000).toISOString().substr(11, 8);
 
-    const handleWhatsAppShare = (contact) => {
-        if (!tripDetails || !tripDetails._id) {
-            alert("Error: Trip ID is missing. Cannot share.");
-            return;
-        }
+  const handleWhatsAppShare = (contact) => {
+    if (!tripDetails || !tripDetails._id) {
+      alert("Error: Trip ID is missing. Cannot share.");
+      return;
+    }
 
-        // 1. Construct the Tracking Link
-        // Using window.location.origin ensures it works on localhost or deployed URL
-        const trackingLink = `${window.location.origin}/track/${tripDetails._id}`;
-        
-        // 2. Format the message with NEWLINES (\n) to separate the link
-        const message = `🚨 I started a SafeWalk trip!\n\nTrack my live location here:\n${trackingLink}`;
-        
-        // 3. Clean the Phone Number (remove anything that isn't a number)
-        const phone = contact.phone.replace(/[^0-9]/g, ''); 
-        
-        // 4. Use api.whatsapp.com (More robust than wa.me)
-        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
-        
-        // 5. Open in new tab
-        window.open(url, '_blank');
-    };
+    // 1. Construct the Tracking Link
+    // Using window.location.origin ensures it works on localhost or deployed URL
+    const trackingLink = `${window.location.origin}/track/${tripDetails._id}`;
 
-    return (
-        <div className="panel-container">
-            <h3 className="status-title">Trip in Progress</h3>
-            <div className="timer-display"><p>ELAPSED TIME</p><span>{format(time)}</span></div>
-            <div className="trip-actions">
-                <button className="share-button" onClick={() => setShowModal(true)}>Share Link</button>
-                <button className="end-trip-button" onClick={onEndTrip}>End Trip</button>
+    // 2. Format the message with NEWLINES (\n) to separate the link
+    const message = `🚨 I started a SafeWalk trip!\n\nTrack my live location here:\n${trackingLink}`;
+
+    // 3. Clean the Phone Number (remove anything that isn't a number)
+    const phone = contact.phone.replace(/[^0-9]/g, '');
+
+    // 4. Use api.whatsapp.com (More robust than wa.me)
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+
+    // 5. Open in new tab
+    window.open(url, '_blank');
+  };
+
+  return (
+    <div className="panel-container">
+      <h3 className="status-title">Trip in Progress</h3>
+      <div className="timer-display"><p>ELAPSED TIME</p><span>{format(time)}</span></div>
+      <div className="trip-actions">
+        <button className="share-button" onClick={() => setShowModal(true)}>Share Link</button>
+        <button className="end-trip-button" onClick={onEndTrip}>End Trip</button>
+      </div>
+
+      {/* Share Modal */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Share with...</h3>
+              <button onClick={() => setShowModal(false)} style={{ border: 'none', background: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
             </div>
-
-            {/* Share Modal */}
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h3>Share with...</h3>
-                            <button onClick={() => setShowModal(false)} style={{border:'none', background:'none', fontSize:'1.5rem', cursor:'pointer'}}>×</button>
-                        </div>
-                        {contacts.length === 0 ? <p>No contacts found.</p> : contacts.map(c => (
-                            <div key={c._id} className="share-item">
-                                <div><strong>{c.name}</strong><br/>{c.phone}</div>
-                                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>
-                                    Share on WhatsApp
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {contacts.length === 0 ? <p>No contacts found.</p> : contacts.map(c => (
+              <div key={c._id} className="share-item">
+                <div><strong>{c.name}</strong><br />{c.phone}</div>
+                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>
+                  Share on WhatsApp
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 // --- MAIN DASHBOARD COMPONENT ---
@@ -245,11 +245,11 @@ const Dashboard = () => {
   const [tripDetails, setTripDetails] = useState(null);
   const [userPosition, setUserPosition] = useState({ lat: 26.7606, lng: 83.3732 });
   const [searchError, setSearchError] = useState('');
-  
+
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     loadLeafletCSS();
     loadLeafletScript(() => setIsLeafletReady(true));
@@ -309,41 +309,60 @@ const Dashboard = () => {
       return;
     }
     const token = localStorage.getItem('token');
-    
-    try {
-        const res = await axios.post('http://localhost:5000/api/trips/start', {
-            destination: { 
-                name: selectedDestination.display_name, 
-                lat: selectedDestination.lat, 
-                lon: selectedDestination.lon 
-            }
-        }, { headers: { 'x-auth-token': token } });
-        
-        setTripDetails(res.data);
-        setIsTripActive(true);
-        
-        socketRef.current.emit('joinTripRoom', res.data._id);
-        
-        watchIdRef.current = navigator.geolocation.watchPosition(p => {
-             const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
-             setUserPosition(coords);
-             socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
-        }, (err) => console.error(err), { enableHighAccuracy: true });
 
-    } catch(e) { 
-        console.error(e);
-        alert(`Error starting trip: ${e.message}`); 
+    try {
+      const res = await axios.post('http://localhost:5000/api/trips/start', {
+        destination: {
+          name: selectedDestination.display_name,
+          lat: selectedDestination.lat,
+          lon: selectedDestination.lon
+        }
+      }, { headers: { 'x-auth-token': token } });
+
+      setTripDetails(res.data);
+      setIsTripActive(true);
+
+      socketRef.current.emit('joinTripRoom', res.data._id);
+
+      watchIdRef.current = navigator.geolocation.watchPosition(p => {
+        const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+        setUserPosition(coords);
+        socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
+      }, (err) => console.error(err), { enableHighAccuracy: true });
+
+    } catch (e) {
+      console.error(e);
+      alert(`Error starting trip: ${e.message}`);
     }
   };
 
-  const handleEndTrip = () => {
-    if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
-    setIsTripActive(false);
-    setTripDetails(null);
-    setSelectedDestination(null);
-    setSearchTerm('');
-    setSearchResults([]);
-    alert("Trip ended safely.");
+  const handleEndTrip = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      // Notify server via REST API to update database
+      await axios.post(`http://localhost:5000/api/trips/${tripDetails._id}/end`, {}, {
+        headers: { 'x-auth-token': token }
+      });
+
+      // Also emit socket event for real-time notification to trackers
+      socketRef.current.emit('endTrip', { tripId: tripDetails._id });
+
+      // Clear local geolocation watch
+      if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
+
+      // Reset local state
+      setIsTripActive(false);
+      setTripDetails(null);
+      setSelectedDestination(null);
+      setSearchTerm('');
+      setSearchResults([]);
+
+      alert("Trip ended safely.");
+    } catch (err) {
+      console.error('Error ending trip:', err);
+      alert('Failed to end trip. Please try again.');
+    }
   };
 
   return (
@@ -352,16 +371,16 @@ const Dashboard = () => {
       <div className="dashboard-layout">
         <div className="map-column">
           {isLeafletReady ? (
-             <MapView userPosition={userPosition} destination={selectedDestination} />
+            <MapView userPosition={userPosition} destination={selectedDestination} />
           ) : (
-            <p style={{textAlign: 'center', paddingTop: '2rem'}}>Loading Map Library...</p>
+            <p style={{ textAlign: 'center', paddingTop: '2rem' }}>Loading Map Library...</p>
           )}
         </div>
         <div className="controls-column">
           {isTripActive ? (
-            <TripStatusPanel 
-              tripDetails={tripDetails} 
-              onEndTrip={handleEndTrip} 
+            <TripStatusPanel
+              tripDetails={tripDetails}
+              onEndTrip={handleEndTrip}
               contacts={contacts}
             />
           ) : (

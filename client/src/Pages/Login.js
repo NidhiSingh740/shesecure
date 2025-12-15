@@ -120,7 +120,7 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch("http://172.18.24.204:5000/api/auth/login", {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

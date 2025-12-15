@@ -160,10 +160,10 @@ const ManageContacts = () => {
       } catch (err) {
         // FIX 2: Handle expired token (401) gracefully
         if (err.response && err.response.status === 401) {
-            localStorage.removeItem('token');
-            navigate('/login');
+          localStorage.removeItem('token');
+          navigate('/login');
         } else {
-            setError('Could not fetch contacts. Please ensure backend is running.');
+          setError('Could not fetch contacts. Please ensure backend is running.');
         }
       } finally {
         setLoading(false);
@@ -191,10 +191,10 @@ const ManageContacts = () => {
       setPhone('');
     } catch (err) {
       if (err.response && err.response.status === 401) {
-         localStorage.removeItem('token');
-         navigate('/login');
+        localStorage.removeItem('token');
+        navigate('/login');
       } else {
-         setError(err.response?.data?.msg || 'Failed to add contact.');
+        setError(err.response?.data?.msg || 'Failed to add contact.');
       }
     }
   };
