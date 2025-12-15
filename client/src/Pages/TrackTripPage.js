@@ -1,167 +1,137 @@
-
+// src/Pages/TrackTripPage.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { io } from 'socket.io-client';
 
-// --- STYLES AND SCRIPT LOADERS (Self-Contained) ---
-// To resolve the build errors, we will load Leaflet's CSS and JS from a CDN
-// and embed the component's own styles directly.
-
-const TrackTripPageStyles = () => (
-  <style>{`
-    .track-container {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .track-header {
-      padding: 1rem 2rem;
-      background-color: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 1000;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .track-header h1 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: #111827;
-    }
-    .track-header p {
-      margin: 0.25rem 0 0;
-      color: #6b7280;
-    }
-    .track-header .active { color: #16a34a; font-weight: bold; }
-    .track-header .ended { color: #dc2626; font-weight: bold; }
-    .loading-container, .error-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        font-size: 1.2rem;
-        color: #4b5563;
-    }
-    .error-text { color: #dc2626; }
-  `}</style>
-);
-
-// Injects the required Leaflet CSS into the document's head
-const loadLeafletCSS = () => {
-  if (!document.getElementById('leaflet-css')) {
-    const link = document.createElement('link');
-    link.id = 'leaflet-css';
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-  }
-};
-
-// Injects the Leaflet JavaScript library and calls a function when it's ready
-const loadLeafletScript = (callback) => {
-  if (window.L) {
-    callback();
-    return;
-  }
-  const script = document.createElement('script');
-  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  script.onload = () => callback();
-  document.head.appendChild(script);
-};
+const API_URL = 'http://172.18.24.204:5000'; // your backend URL
 
 const TrackTripPage = () => {
   const { tripId } = useParams();
+
   const [trip, setTrip] = useState(null);
-  const [livePosition, setLivePosition] = useState(null);
+  const [livePos, setLivePos] = useState(null);
+  const [isEnded, setIsEnded] = useState(false);
   const [error, setError] = useState('');
-  const [isMapReady, setIsMapReady] = useState(false);
-  
-  const socketRef = useRef(null);
-  const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const markerInstanceRef = useRef(null);
-  const polylineInstanceRef = useRef(null);
 
+  const mapRef = useRef(null);
+  const mapObj = useRef(null);
+  const marker = useRef(null);
+  const pollIntervalRef = useRef(null);
+
+  // load Leaflet JS + CSS from CDN
+  const loadLeaflet = (cb) => {
+    if (window.L) return cb();
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    s.onload = cb;
+    document.head.appendChild(s);
+
+    const c = document.createElement('link');
+    c.rel = 'stylesheet';
+    c.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(c);
+  };
+
+  // 1) Setup map once
   useEffect(() => {
-    loadLeafletCSS();
-    loadLeafletScript(() => setIsMapReady(true));
+    loadLeaflet(() => {
+      if (mapRef.current && !mapObj.current) {
+        const L = window.L;
+        mapObj.current = L.map(mapRef.current).setView([26.76, 83.37], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+          .addTo(mapObj.current);
 
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl:
+            'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+          iconUrl:
+            'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+          shadowUrl:
+            'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        });
+
+        marker.current = L.marker([26.76, 83.37]).addTo(mapObj.current);
+      }
+    });
+  }, []);
+
+  // 2) Poll trip status every 3 seconds
+  useEffect(() => {
     const fetchTrip = async () => {
       try {
-        const res = await axios.get(`http://172.18.24.204:5000/api/trips/${tripId}`);
+        const res = await axios.get(`${API_URL}/api/trips/${tripId}`);
         setTrip(res.data);
-        if (res.data.path.length > 0) {
-          const lastPos = res.data.path[res.data.path.length - 1];
-          setLivePosition({ lat: lastPos.lat, lng: lastPos.lng });
+        setIsEnded(!res.data.isActive);
+
+        if (res.data.path && res.data.path.length > 0) {
+          const last = res.data.path[res.data.path.length - 1];
+          setLivePos(last);
         }
       } catch (err) {
-        setError('Could not find or load the trip.');
+        console.error('Polling error', err);
+        setError('Could not load trip. It may have been deleted or ended.');
+        // optional: stop polling on fatal error
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
       }
     };
 
+    // initial fetch
     fetchTrip();
 
-    socketRef.current = io('172.18.24.204:5000');
-    socketRef.current.emit('joinTripRoom', tripId);
-    socketRef.current.on('tripUpdate', (newCoordinates) => {
-      setLivePosition(newCoordinates);
-      setTrip(prevTrip => prevTrip ? { ...prevTrip, path: [...prevTrip.path, newCoordinates] } : null);
-    });
+    // poll every 3 seconds
+    pollIntervalRef.current = setInterval(fetchTrip, 3000);
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
       }
     };
   }, [tripId]);
-  
+
+  // 3) Update marker when livePos changes
   useEffect(() => {
-    if (isMapReady && mapContainerRef.current && livePosition && window.L) {
-      const L = window.L;
-      if (!mapInstanceRef.current) {
-        mapInstanceRef.current = L.map(mapContainerRef.current).setView([livePosition.lat, livePosition.lng], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstanceRef.current);
-        
-        const customIcon = new L.Icon({
-            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41]
-        });
-        markerInstanceRef.current = L.marker([livePosition.lat, livePosition.lng], { icon: customIcon }).addTo(mapInstanceRef.current);
-      } else {
-        mapInstanceRef.current.panTo([livePosition.lat, livePosition.lng]);
-        markerInstanceRef.current.setLatLng([livePosition.lat, livePosition.lng]);
-      }
-      
-      if (trip && trip.path.length > 0) {
-        const pathPositions = trip.path.map(p => [p.lat, p.lng]);
-        if (!polylineInstanceRef.current) {
-          polylineInstanceRef.current = L.polyline(pathPositions, { color: 'blue' }).addTo(mapInstanceRef.current);
-        } else {
-          polylineInstanceRef.current.setLatLngs(pathPositions);
-        }
+    if (livePos && mapObj.current && window.L && marker.current) {
+      const lat = parseFloat(livePos.lat);
+      const lng = parseFloat(livePos.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        marker.current.setLatLng([lat, lng]);
+        mapObj.current.setView([lat, lng]);
       }
     }
-  }, [isMapReady, livePosition, trip]);
+  }, [livePos]);
 
-  if (error) return <div className="error-container"><p className="error-text">{error}</p></div>;
-  if (!trip) return <div className="loading-container"><p>Loading trip details...</p></div>;
+  if (error) {
+    return (
+      <div style={{height: '100vh', display:'flex', alignItems:'center', justifyContent:'center'}}>
+        <p style={{color:'red'}}>{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <TrackTripPageStyles />
-      <div className="track-container">
-        <div className="track-header">
-          <h1>Tracking {trip.userId.fullName}'s Trip</h1>
-          <p>Status: <span className={trip.isActive ? 'active' : 'ended'}>{trip.isActive ? 'In Progress' : 'Ended'}</span></p>
-        </div>
-        <div ref={mapContainerRef} style={{ flexGrow: 1, width: '100%' }} />
+    <div style={{height: '100vh', display:'flex', flexDirection:'column'}}>
+      <div
+        style={{
+          padding:'20px',
+          background:'white',
+          textAlign:'center',
+          boxShadow:'0 2px 5px rgba(0,0,0,0.1)',
+          zIndex:1000
+        }}
+      >
+        <h2>Tracking {trip?.userId?.fullName || 'Trip'}</h2>
+        {isEnded
+          ? <h3 style={{color:'red'}}>TRIP ENDED</h3>
+          : <h3 style={{color:'green'}}>TRIP IN PROGRESS</h3>}
       </div>
-    </>
+      <div ref={mapRef} style={{flex:1}}></div>
+    </div>
   );
 };
 
 export default TrackTripPage;
-

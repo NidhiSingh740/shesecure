@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-// --- STYLES (Your Exact Design) ---
+// --- STYLES (Self-Contained for Stability) ---
 const DashboardStyles = () => (
   <style>{`
     /* --- Main Layout --- */
@@ -48,8 +48,8 @@ const DashboardStyles = () => (
     .share-button, .end-trip-button { flex: 1; padding: 1rem; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; }
     .share-button { background-color: #f3f4f6; color: #111; }
     .end-trip-button { background-color: #ef4444; color: white; }
-
-    /* --- Modal Styles --- */
+    
+    /* Modal Styles */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; justify-content: center; align-items: center; }
     .modal-content { background: white; width: 90%; max-width: 400px; padding: 2rem; border-radius: 12px; }
     .modal-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
@@ -163,7 +163,7 @@ const BeforeTripPanel = ({ contacts, loading, contactsError, searchTerm, setSear
     </div>
 );
 
-// --- TRIP STATUS PANEL (With WhatsApp Share) ---
+// --- TRIP STATUS PANEL (With FIXED WhatsApp Logic) ---
 const TripStatusPanel = ({ tripDetails, onEndTrip, contacts }) => {
     const [time, setTime] = useState(0);
     const [showModal, setShowModal] = useState(false);
@@ -177,18 +177,23 @@ const TripStatusPanel = ({ tripDetails, onEndTrip, contacts }) => {
     const format = (s) => new Date(s * 1000).toISOString().substr(11, 8);
 
     const handleWhatsAppShare = (contact) => {
-        // 1. Get the link using the REAL DB ID
-        // IMPORTANT: window.location.origin typically gives http://localhost:3000 in dev
+        if (!tripDetails || !tripDetails._id) {
+            alert("Error: Trip ID is missing. Cannot share.");
+            return;
+        }
+
+        // 1. Construct the Tracking Link
+        // Using window.location.origin ensures it works on localhost or deployed URL
         const trackingLink = `${window.location.origin}/track/${tripDetails._id}`;
         
-        // 2. Format the message
-        const message = `🚨 I started a SafeWalk trip! Track my live location here: ${trackingLink}`;
+        // 2. Format the message with NEWLINES (\n) to separate the link
+        const message = `🚨 I started a SafeWalk trip!\n\nTrack my live location here:\n${trackingLink}`;
         
-        // 3. Clean phone number
+        // 3. Clean the Phone Number (remove anything that isn't a number)
         const phone = contact.phone.replace(/[^0-9]/g, ''); 
         
-        // 4. Create the URL - using encodeURIComponent for safety
-        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        // 4. Use api.whatsapp.com (More robust than wa.me)
+        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
         
         // 5. Open in new tab
         window.open(url, '_blank');
@@ -261,7 +266,7 @@ const Dashboard = () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Authorization failed.');
-        const res = await axios.get('http://172.18.24.204:5000/api/contacts', {
+        const res = await axios.get('http://localhost:5000/api/contacts', {
           headers: { 'x-auth-token': token },
         });
         setContacts(res.data);
@@ -273,7 +278,7 @@ const Dashboard = () => {
     };
     fetchContacts();
 
-    socketRef.current = io('http://172.18.24.204:5000');
+    socketRef.current = io('http://localhost:5000');
     return () => {
       if (socketRef.current) socketRef.current.disconnect();
       if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
@@ -306,7 +311,7 @@ const Dashboard = () => {
     const token = localStorage.getItem('token');
     
     try {
-        const res = await axios.post('http://172.18.24.204:5000/api/trips/start', {
+        const res = await axios.post('http://localhost:5000/api/trips/start', {
             destination: { 
                 name: selectedDestination.display_name, 
                 lat: selectedDestination.lat, 
@@ -357,7 +362,7 @@ const Dashboard = () => {
             <TripStatusPanel 
               tripDetails={tripDetails} 
               onEndTrip={handleEndTrip} 
-              contacts={contacts} // --- FIX: Passed contacts prop here ---
+              contacts={contacts}
             />
           ) : (
             <BeforeTripPanel
