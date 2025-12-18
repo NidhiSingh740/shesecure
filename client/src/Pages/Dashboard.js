@@ -3,71 +3,54 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-// --- STYLES (Self-Contained for Stability) ---
+// --- CONFIG ---
+const API_URL = 'http://172.18.24.204:5000'; // Your IP
+
+// --- STYLES ---
 const DashboardStyles = () => (
   <style>{`
-    /* --- Main Layout --- */
-    .dashboard-layout { display: flex; height: calc(100vh - 70px); background-color: #f3f4f6; }
+    .dashboard-layout { display: flex; height: calc(100vh - 70px); background-color: #f3f4f6; position: relative; }
     .map-column { flex: 3; background-color: #e5e7eb; position: relative; }
-    .controls-column { flex: 2; background-color: #ffffff; padding: 1.5rem 2rem; box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; overflow-y: hidden; }
+    .controls-column { flex: 2; background-color: #ffffff; padding: 1.5rem 2rem; display: flex; flex-direction: column; overflow-y: hidden; }
+    .panel-container { display: flex; flex-direction: column; height: 100%; position: relative; }
+    
+    /* SOS Button */
+    .sos-btn-floating { position: absolute; bottom: 30px; right: 30px; width: 80px; height: 80px; background: radial-gradient(circle, #ff4d4d 0%, #cc0000 100%); border: 4px solid white; border-radius: 50%; color: white; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4); cursor: pointer; z-index: 1000; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); } }
 
-    /* --- Universal Panel Styles --- */
-    .panel-container { display: flex; flex-direction: column; height: 100%; }
-    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 1rem; }
-    .panel-header h3 { margin: 0; font-size: 1.25rem; color: #111827; }
+    /* SOS Countdown Overlay */
+    .sos-countdown-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(200, 0, 0, 0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+    .countdown-number { font-size: 8rem; font-weight: bold; margin: 20px 0; }
+    .btn-cancel-sos { background: white; color: #cc0000; padding: 15px 30px; font-size: 1.5rem; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; }
 
-    /* --- Trip Planning Module --- */
-    .trip-planning-module { flex-shrink: 0; }
+    /* Safe Check */
+    .safe-check-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+    .safe-timer { font-size: 1.5rem; font-weight: bold; color: #856404; display: block; margin: 10px 0; }
+    .btn-im-safe { background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+    /* UI Basics */
     .destination-form label { font-weight: 600; color: #374151; display: block; margin-bottom: 0.5rem; }
     .search-input-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .search-input-group input { flex-grow: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; }
+    .search-input-group input { flex-grow: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; }
     .search-input-group button { background: linear-gradient(90deg, #b8369a, #6a11cb); color: white; border: none; border-radius: 8px; padding: 0 1rem; cursor: pointer; }
-    .results-section { margin-bottom: 1rem; max-height: 150px; overflow-y: auto; }
-    .results-list { list-style: none; padding: 0; margin: 0; border: 1px solid #e5e7eb; border-radius: 8px; }
-    .results-list li { padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; font-size: 0.9rem; }
-    .results-list li:last-child { border-bottom: none; }
-    .results-list li:hover { background-color: #f3f4f6; }
-    .results-list li.selected { background-color: #e0e7ff; font-weight: bold; }
-    .start-trip-button { width: 100%; padding: 1rem; margin-top: 1rem; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(90deg, #b669a4, #8d5ec1); border: none; border-radius: 8px; cursor: pointer; }
+    .results-list li { padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; }
+    .results-list li:hover { background: #f0f9ff; }
+    .start-trip-button { width: 100%; padding: 1rem; margin-top: 1rem; background: linear-gradient(90deg, #b669a4, #8d5ec1); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     .start-trip-button:disabled { background: #c4b5fd; cursor: not-allowed; }
-    .search-error, .error-text { color: #ef4444; }
-
-    /* --- Contacts Module --- */
-    .contacts-module { flex-grow: 1; margin-top: 2rem; overflow-y: auto; }
-    .manage-link { text-decoration: none; color: #4f46e5; font-weight: 600; }
-    .contact-item { display: flex; align-items: center; padding: 0.75rem 0; gap: 1rem; }
-    .contact-avatar { width: 40px; height: 40px; border-radius: 50%; background-color: #e0e7ff; color: #4338ca; display: grid; place-items: center; font-weight: bold; }
-    .contact-details { display: flex; flex-direction: column; }
-
-    /* --- Trip Status Panel --- */
-    .status-title { text-align: center; font-size: 1.5rem; }
-    .timer-display { text-align: center; margin: auto; }
-    .timer-display p { margin: 0; color: #6b7280; }
-    .timer-display span { font-size: 4rem; font-weight: bold; }
-    .trip-actions { display: flex; gap: 1rem; margin-top: 2rem; }
-    .share-button, .end-trip-button { flex: 1; padding: 1rem; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; }
-    .share-button { background-color: #f3f4f6; color: #111; }
-    .end-trip-button { background-color: #ef4444; color: white; }
     
-    /* Modal Styles */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-    .modal-content { background: white; width: 90%; max-width: 400px; padding: 2rem; border-radius: 12px; }
-    .modal-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
-    .share-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; border-bottom: 1px solid #eee; }
-    .wa-btn { background: #25D366; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; text-decoration: none; }
-    .wa-btn:hover { background: #128C7E; }
+    .timer-display { text-align: center; margin: 2rem 0; }
+    .timer-display span { font-size: 3rem; font-weight: bold; color: #111; }
+    .trip-actions { display: flex; gap: 1rem; margin-top: auto; }
+    .share-button { flex: 1; padding: 1rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .end-trip-button { flex: 1; padding: 1rem; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
   `}</style>
 );
 
-// --- LEAFLET LOADERS ---
-const loadLeafletCSS = () => {
-  if (!document.getElementById('leaflet-css')) {
-    const link = document.createElement('link'); link.id = 'leaflet-css'; link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(link);
-  }
-};
-const loadLeafletScript = (callback) => {
-  if (window.L) { callback(); return; }
-  const script = document.createElement('script'); script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; script.onload = () => callback(); document.head.appendChild(script);
+// --- LOADERS ---
+const loadLeaflet = (cb) => {
+  if (window.L) return cb();
+  const c = document.createElement('link'); c.rel='stylesheet'; c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
+  const s = document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload=cb; document.head.appendChild(s);
 };
 
 // --- MAP VIEW ---
@@ -79,13 +62,24 @@ const MapView = ({ userPosition, destination }) => {
   const polylineRef = useRef(null);
 
   useEffect(() => {
-    loadLeafletCSS();
-    loadLeafletScript(() => {
-      const L = window.L;
-      if (mapContainerRef.current && !mapInstanceRef.current) {
-        mapInstanceRef.current = L.map(mapContainerRef.current).setView([userPosition.lat, userPosition.lng], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstanceRef.current);
-        userMarkerRef.current = L.marker([userPosition.lat, userPosition.lng]).addTo(mapInstanceRef.current);
+    loadLeaflet(() => {
+      if (window.L && mapContainerRef.current && !mapInstanceRef.current) {
+        try {
+            const L = window.L;
+            delete L.Icon.Default.prototype._getIconUrl;
+            L.Icon.Default.mergeOptions({
+                iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            });
+            
+            const lat = parseFloat(userPosition?.lat) || 26.76;
+            const lng = parseFloat(userPosition?.lng) || 83.37;
+            
+            mapInstanceRef.current = L.map(mapContainerRef.current).setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstanceRef.current);
+            userMarkerRef.current = L.marker([lat, lng]).addTo(mapInstanceRef.current);
+        } catch (e) { console.error("Map Error", e); }
       }
     });
   }, []);
@@ -93,27 +87,29 @@ const MapView = ({ userPosition, destination }) => {
   useEffect(() => {
     if (mapInstanceRef.current && window.L) {
       const L = window.L;
-      if (userMarkerRef.current) userMarkerRef.current.setLatLng([userPosition.lat, userPosition.lng]);
-
-      if (destination) {
-        if (!destMarkerRef.current) {
-          destMarkerRef.current = L.marker([destination.lat, destination.lon]).addTo(mapInstanceRef.current);
-        } else {
-          destMarkerRef.current.setLatLng([destination.lat, destination.lon]);
+      try {
+        const uLat = parseFloat(userPosition?.lat);
+        const uLng = parseFloat(userPosition?.lng);
+        
+        if (!isNaN(uLat) && !isNaN(uLng) && userMarkerRef.current) {
+             userMarkerRef.current.setLatLng([uLat, uLng]);
+             // Optional: center map on user periodically
+             // mapInstanceRef.current.panTo([uLat, uLng]);
         }
 
-        const path = [[userPosition.lat, userPosition.lng], [destination.lat, destination.lon]];
-        if (!polylineRef.current) {
-          polylineRef.current = L.polyline(path, { color: '#4f46e5' }).addTo(mapInstanceRef.current);
-        } else {
-          polylineRef.current.setLatLngs(path);
+        if (destination && destination.lat) {
+           const dLat = parseFloat(destination.lat);
+           const dLng = parseFloat(destination.lon);
+           if (!isNaN(dLat)) {
+                if (!destMarkerRef.current) destMarkerRef.current = L.marker([dLat, dLng]).addTo(mapInstanceRef.current);
+                else destMarkerRef.current.setLatLng([dLat, dLng]);
+                
+                const path = [[uLat, uLng], [dLat, dLng]];
+                if (!polylineRef.current) polylineRef.current = L.polyline(path, {color:'#4f46e5'}).addTo(mapInstanceRef.current);
+                else polylineRef.current.setLatLngs(path);
+           }
         }
-
-        mapInstanceRef.current.fitBounds(path, { padding: [50, 50] });
-      } else {
-        if (destMarkerRef.current) { destMarkerRef.current.remove(); destMarkerRef.current = null; }
-        if (polylineRef.current) { polylineRef.current.remove(); polylineRef.current = null; }
-      }
+      } catch (e) { console.error(e); }
     }
   }, [userPosition, destination]);
 
@@ -121,288 +117,217 @@ const MapView = ({ userPosition, destination }) => {
 };
 
 // --- BEFORE TRIP PANEL ---
-const BeforeTripPanel = ({ contacts, loading, contactsError, searchTerm, setSearchTerm, onSearch, isSearching, searchResults, onSelectDestination, selectedDestination, onStartTrip, searchError }) => (
-  <div className="panel-container">
-    <div className="trip-planning-module">
-      <h3>Start a New Trip</h3>
-      <div className="destination-form">
-        <label>Where are you going?</label>
+const BeforeTripPanel = ({ contacts, searchTerm, setSearchTerm, onSearch, results, onSelectDest, dest, onStart, setSafeCheckInterval }) => (
+    <div className="panel-container">
+        <h3>Start Trip</h3>
         <div className="search-input-group">
-          <input type="text" placeholder="Search for a destination..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && onSearch()} />
-          <button onClick={onSearch} disabled={isSearching}>{isSearching ? '...' : 'Search'}</button>
+            <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Destination..." />
+            <button onClick={onSearch}>Search</button>
         </div>
-        {searchError && <p className="search-error">{searchError}</p>}
-        {searchResults.length > 0 && (
-          <div className="results-section">
-            <ul className="results-list">
-              {searchResults.slice(0, 5).map((result) => (
-                <li key={result.place_id} className={selectedDestination?.place_id === result.place_id ? 'selected' : ''} onClick={() => onSelectDestination(result)}>
-                  {result.display_name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <button className="start-trip-button" onClick={onStartTrip} disabled={!selectedDestination}>Start SafeWalk Trip</button>
-      </div>
+        <ul className="results-list">
+            {results.slice(0, 3).map(r => (
+                <li key={r.place_id} onClick={() => onSelectDest({lat: r.lat, lon: r.lon, display_name: r.display_name})} style={{background: dest?.place_id === r.place_id ? '#e0e7ff':''}}>{r.display_name}</li>
+            ))}
+        </ul>
+        <div style={{margin: '15px 0'}}>
+            <label>Safe Check (Auto SOS):</label>
+            <select style={{width:'100%', padding:'10px'}} onChange={(e) => setSafeCheckInterval(e.target.value)}>
+                <option value="">Off</option>
+                <option value="0.2">10 Seconds (Test)</option>
+                <option value="1">1 Minute</option>
+                <option value="15">15 Minutes</option>
+            </select>
+        </div>
+        <button className="start-trip-button" onClick={onStart} disabled={!dest}>Start SafeWalk</button>
+        <div style={{marginTop:'10px'}}><h4>Contacts</h4>{contacts.map(c=><div key={c._id}>👤 {c.name}</div>)}</div>
     </div>
-    <div className="contacts-module">
-      <div className="panel-header"><h3>Trusted Contacts</h3><Link to="/contacts" className="manage-link">Manage</Link></div>
-      <div className="contact-list">
-        {loading && <p>Loading contacts...</p>}
-        {contactsError && <p className="error-text">{contactsError}</p>}
-        {!loading && !contactsError && contacts.map(contact => (
-          <div key={contact._id} className="contact-item">
-            <div className="contact-avatar">{contact.name.charAt(0)}</div>
-            <div className="contact-details"><strong>{contact.name}</strong><span>{contact.phone}</span></div>
-          </div>
-        ))}
-        {!loading && !contactsError && contacts.length === 0 && <p>No contacts added yet.</p>}
-      </div>
-    </div>
-  </div>
 );
 
-// --- TRIP STATUS PANEL (With FIXED WhatsApp Logic) ---
-const TripStatusPanel = ({ tripDetails, onEndTrip, contacts }) => {
-  const [time, setTime] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+// --- TRIP STATUS PANEL ---
+const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onTriggerSOS, safeCheckSeconds, resetSafeCheck }) => {
+    const [time, setTime] = useState(0);
+    
+    useEffect(() => {
+        if(!tripDetails) return;
+        const i = setInterval(() => setTime(Math.floor((new Date() - new Date(tripDetails.startedAt)) / 1000)), 1000);
+        return () => clearInterval(i);
+    }, [tripDetails]);
 
-  useEffect(() => {
-    const start = tripDetails.startedAt ? new Date(tripDetails.startedAt) : new Date();
-    const i = setInterval(() => setTime(Math.floor((new Date() - start) / 1000)), 1000);
-    return () => clearInterval(i);
-  }, [tripDetails]);
+    const format = (s) => new Date(s * 1000).toISOString().substr(11, 8);
 
-  const format = (s) => new Date(s * 1000).toISOString().substr(11, 8);
+    const handleShare = (contact) => {
+        const link = `${window.location.origin}/track/${tripDetails._id}`;
+        window.open(`https://api.whatsapp.com/send?phone=${contact.phone.replace(/\D/g,'')}&text=${encodeURIComponent(`🚨 Tracking Link: ${link}`)}`, '_blank');
+    };
 
-  const handleWhatsAppShare = (contact) => {
-    if (!tripDetails || !tripDetails._id) {
-      alert("Error: Trip ID is missing. Cannot share.");
-      return;
-    }
+    return (
+        <div className="panel-container">
+            <h3 className="status-title">Trip in Progress</h3>
+            
+            {safeCheckSeconds !== null && (
+                <div className="safe-check-box">
+                    <small>SAFE CHECK IN</small>
+                    <span className="safe-timer" style={{color: safeCheckSeconds < 10 ? 'red' : 'inherit'}}>
+                        {Math.floor(safeCheckSeconds / 60)}:{String(safeCheckSeconds % 60).padStart(2,'0')}
+                    </span>
+                    <button className="btn-im-safe" onClick={resetSafeCheck}>I'm Safe</button>
+                </div>
+            )}
 
-    // 1. Construct the Tracking Link
-    // Using window.location.origin ensures it works on localhost or deployed URL
-    const trackingLink = `${window.location.origin}/track/${tripDetails._id}`;
-
-    // 2. Format the message with NEWLINES (\n) to separate the link
-    const message = `🚨 I started a SafeWalk trip!\n\nTrack my live location here:\n${trackingLink}`;
-
-    // 3. Clean the Phone Number (remove anything that isn't a number)
-    const phone = contact.phone.replace(/[^0-9]/g, '');
-
-    // 4. Use api.whatsapp.com (More robust than wa.me)
-    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
-
-    // 5. Open in new tab
-    window.open(url, '_blank');
-  };
-
-  return (
-    <div className="panel-container">
-      <h3 className="status-title">Trip in Progress</h3>
-      <div className="timer-display"><p>ELAPSED TIME</p><span>{format(time)}</span></div>
-      <div className="trip-actions">
-        <button className="share-button" onClick={() => setShowModal(true)}>Share Link</button>
-        <button className="end-trip-button" onClick={onEndTrip}>End Trip</button>
-      </div>
-
-      {/* Share Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Share with...</h3>
-              <button onClick={() => setShowModal(false)} style={{ border: 'none', background: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+            <div className="timer-display"><p>DURATION</p><span>{format(time)}</span></div>
+            
+            <div className="trip-actions">
+               {contacts.map(c => <button key={c._id} className="share-button" onClick={() => handleShare(c)}>Share {c.name}</button>)}
+               <button className="end-trip-button" onClick={onEndTrip}>End</button>
             </div>
-            {contacts.length === 0 ? <p>No contacts found.</p> : contacts.map(c => (
-              <div key={c._id} className="share-item">
-                <div><strong>{c.name}</strong><br />{c.phone}</div>
-                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>
-                  Share on WhatsApp
-                </button>
-              </div>
-            ))}
-          </div>
+            
+            {/* Start Countdown Logic */}
+            <button className="sos-btn-floating" onClick={onTriggerSOS}>SOS</button>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
-// --- MAIN DASHBOARD COMPONENT ---
+// --- DASHBOARD ---
 const Dashboard = () => {
-  const [isLeafletReady, setIsLeafletReady] = useState(false);
-  const [isTripActive, setIsTripActive] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const [contacts, setContacts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [contactsError, setContactsError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedDestination, setSelectedDestination] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const [results, setResults] = useState([]);
+  const [dest, setDest] = useState(null);
   const [tripDetails, setTripDetails] = useState(null);
-  const [userPosition, setUserPosition] = useState({ lat: 26.7606, lng: 83.3732 });
-  const [searchError, setSearchError] = useState('');
+  const [userPos, setUserPos] = useState({ lat: 26.76, lng: 83.37 });
+  const [safeCheckInterval, setSafeCheckInterval] = useState(null);
+  const [safeCheckSeconds, setSafeCheckSeconds] = useState(null);
+  
+  // SOS State
+  const [sosCountdown, setSosCountdown] = useState(null); // If not null, countdown is active
 
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadLeafletCSS();
-    loadLeafletScript(() => setIsLeafletReady(true));
-  }, []);
+    socketRef.current = io(API_URL);
+    navigator.geolocation.getCurrentPosition(p => setUserPos({ lat: p.coords.latitude, lng: p.coords.longitude }));
+    const token = localStorage.getItem('token');
+    if(!token) { navigate('/login'); return; }
+    axios.get(`${API_URL}/api/contacts`, { headers: { 'x-auth-token': token } }).then(res => setContacts(res.data));
+    return () => socketRef.current.disconnect();
+  }, [navigate]);
 
+  // Safe Check Logic
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => setUserPosition({ lat: position.coords.latitude, lng: position.coords.longitude }),
-      () => setContactsError("Could not get user's location.")
-    );
-
-    const fetchContacts = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('Authorization failed.');
-        const res = await axios.get('http://localhost:5000/api/contacts', {
-          headers: { 'x-auth-token': token },
-        });
-        setContacts(res.data);
-      } catch (err) {
-        setContactsError('Could not load contacts.');
-      } finally {
-        setLoading(false);
+      let t;
+      if (isActive && safeCheckSeconds !== null && sosCountdown === null) {
+          t = setInterval(() => {
+              setSafeCheckSeconds(prev => {
+                  if (prev <= 1) {
+                      triggerSOSSequence(); // Start 5s countdown
+                      return parseInt(safeCheckInterval) * 60; // Reset safe check
+                  }
+                  return prev - 1;
+              });
+          }, 1000);
       }
-    };
-    fetchContacts();
+      return () => clearInterval(t);
+  }, [isActive, safeCheckSeconds, sosCountdown]);
 
-    socketRef.current = io('http://localhost:5000');
-    return () => {
-      if (socketRef.current) socketRef.current.disconnect();
+  // SOS Countdown Logic
+  useEffect(() => {
+      let t;
+      if (sosCountdown !== null) {
+          if (sosCountdown > 0) {
+              t = setInterval(() => setSosCountdown(prev => prev - 1), 1000);
+          } else {
+              // COUNTDOWN HIT 0: SEND ALERT
+              sendSOSAlert();
+              setSosCountdown(null); // Close overlay
+          }
+      }
+      return () => clearInterval(t);
+  }, [sosCountdown]);
+
+  const triggerSOSSequence = () => {
+      setSosCountdown(5); // Start 5 second countdown
+  };
+
+  const sendSOSAlert = async () => {
+      // 1. Socket
+      socketRef.current.emit('sosTriggered', tripDetails._id);
+      
+      // 2. DB
+      const token = localStorage.getItem('token');
+      try {
+          await axios.post(`${API_URL}/api/trips/${tripDetails._id}/sos`, { lat: userPos.lat, lng: userPos.lng }, { headers: { 'x-auth-token': token } });
+      } catch(e) {}
+
+      // 3. WhatsApp for ALL contacts
+      contacts.forEach(c => {
+         const link = `${window.location.origin}/track/${tripDetails._id}`;
+         const msg = `🚨 SOS! I NEED HELP! Track me: ${link}`;
+         window.open(`https://api.whatsapp.com/send?phone=${c.phone.replace(/\D/g,'')}&text=${encodeURIComponent(msg)}`, '_blank');
+      });
+  };
+
+  const startTrip = async () => {
+    if(!dest) return alert("Select Dest");
+    const token = localStorage.getItem('token');
+    try {
+        const res = await axios.post(`${API_URL}/api/trips/start`, { destination: { name: dest.display_name, lat: dest.lat, lon: dest.lon } }, { headers: { 'x-auth-token': token } });
+        setTripDetails(res.data);
+        setIsActive(true);
+        if (safeCheckInterval) setSafeCheckSeconds(parseInt(safeCheckInterval) * 60);
+        
+        socketRef.current.emit('joinTripRoom', res.data._id);
+        watchIdRef.current = navigator.geolocation.watchPosition(p => {
+             const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+             setUserPos(coords);
+             socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
+        });
+    } catch(e) {}
+  };
+
+  const endTrip = async () => {
       if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
-    };
-  }, []);
+      socketRef.current.emit('endTrip', tripDetails._id);
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/api/trips/${tripDetails._id}/end`, {}, { headers: { 'x-auth-token': token } });
+      setIsActive(false); setTripDetails(null); setDest(null); setResults([]);
+  };
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-    setIsSearching(true);
-    setSearchResults([]);
-    setSearchError('');
-    try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`);
-      if (response.data.length === 0) {
-        setSearchError('No results found for that location.');
-      }
-      setSearchResults(response.data);
-    } catch (err) {
-      setSearchError('Search failed. Please check your network connection.');
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleStartTrip = async () => {
-    if (!selectedDestination) {
-      alert("Please select a destination from the search results first.");
-      return;
-    }
-    const token = localStorage.getItem('token');
-
-    try {
-      const res = await axios.post('http://localhost:5000/api/trips/start', {
-        destination: {
-          name: selectedDestination.display_name,
-          lat: selectedDestination.lat,
-          lon: selectedDestination.lon
-        }
-      }, { headers: { 'x-auth-token': token } });
-
-      setTripDetails(res.data);
-      setIsTripActive(true);
-
-      socketRef.current.emit('joinTripRoom', res.data._id);
-
-      watchIdRef.current = navigator.geolocation.watchPosition(p => {
-        const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
-        setUserPosition(coords);
-        socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
-      }, (err) => console.error(err), { enableHighAccuracy: true });
-
-    } catch (e) {
-      console.error(e);
-      alert(`Error starting trip: ${e.message}`);
-    }
-  };
-
-  const handleEndTrip = async () => {
-    try {
-      const token = localStorage.getItem('token');
-
-      // Notify server via REST API to update database
-      await axios.post(`http://localhost:5000/api/trips/${tripDetails._id}/end`, {}, {
-        headers: { 'x-auth-token': token }
-      });
-
-      // Also emit socket event for real-time notification to trackers
-      socketRef.current.emit('endTrip', { tripId: tripDetails._id });
-
-      // Clear local geolocation watch
-      if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
-
-      // Reset local state
-      setIsTripActive(false);
-      setTripDetails(null);
-      setSelectedDestination(null);
-      setSearchTerm('');
-      setSearchResults([]);
-
-      alert("Trip ended safely.");
-    } catch (err) {
-      console.error('Error ending trip:', err);
-      alert('Failed to end trip. Please try again.');
-    }
-  };
+      const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`);
+      setResults(res.data);
+  }
 
   return (
-    <>
+    <div className="dashboard-layout">
       <DashboardStyles />
-      <div className="dashboard-layout">
-        <div className="map-column">
-          {isLeafletReady ? (
-            <MapView userPosition={userPosition} destination={selectedDestination} />
-          ) : (
-            <p style={{ textAlign: 'center', paddingTop: '2rem' }}>Loading Map Library...</p>
-          )}
-        </div>
-        <div className="controls-column">
-          {isTripActive ? (
-            <TripStatusPanel
-              tripDetails={tripDetails}
-              onEndTrip={handleEndTrip}
-              contacts={contacts}
-            />
-          ) : (
-            <BeforeTripPanel
-              contacts={contacts}
-              loading={loading}
-              contactsError={contactsError}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onSearch={handleSearch}
-              isSearching={isSearching}
-              searchResults={searchResults}
-              onSelectDestination={setSelectedDestination}
-              selectedDestination={selectedDestination}
-              onStartTrip={handleStartTrip}
-              searchError={searchError}
-            />
-          )}
-        </div>
+      <div className="map-column"><MapView userPosition={userPos} destination={dest} /></div>
+      <div className="controls-column">
+        {isActive ? (
+          <TripStatusPanel 
+             tripDetails={tripDetails} 
+             onEndTrip={endTrip} 
+             contacts={contacts} 
+             onTriggerSOS={triggerSOSSequence} // Trigger countdown
+             safeCheckSeconds={safeCheckSeconds}
+             resetSafeCheck={() => setSafeCheckSeconds(parseInt(safeCheckInterval) * 60)}
+          />
+        ) : (
+          <BeforeTripPanel contacts={contacts} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} results={results} onSelectDest={setDest} dest={dest} onStart={startTrip} setSafeCheckInterval={setSafeCheckInterval} />
+        )}
       </div>
-    </>
+
+      {/* SOS COUNTDOWN OVERLAY */}
+      {sosCountdown !== null && (
+          <div className="sos-countdown-overlay">
+              <h1>SENDING SOS IN...</h1>
+              <div className="countdown-number">{sosCountdown}</div>
+              <button className="btn-cancel-sos" onClick={() => setSosCountdown(null)}>CANCEL - I'M SAFE</button>
+          </div>
+      )}
+    </div>
   );
 };
-
 export default Dashboard;
