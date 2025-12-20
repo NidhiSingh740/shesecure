@@ -15,7 +15,8 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://172.18.24.204:3000"],
+    // Allow connections from your specific IP and localhost
+    origin: ["http://localhost:3000", "http://172.18.24.204:3000", "*"],
     methods: ["GET", "POST", "PUT"]
   }
 });
@@ -32,35 +33,38 @@ app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/trips', tripRoutes);
 
-// --- SOCKET LOGIC ---
 io.on('connection', (socket) => {
-  console.log('🔌 Socket Connected:', socket.id);
-
+  // 1. Join Room
   socket.on('joinTripRoom', (tripId) => {
     socket.join(tripId);
   });
 
+  // 2. Update Location
   socket.on('updateLocation', async ({ tripId, coordinates }) => {
     io.to(tripId).emit('tripUpdate', coordinates);
     try {
       await Trip.findByIdAndUpdate(tripId, { 
         $push: { path: { lat: coordinates.lat, lng: coordinates.lng } } 
       });
-    } catch (e) { console.error("DB Save Error"); }
+    } catch (e) {}
   });
 
+  // 3. End Trip
   socket.on('endTrip', (tripId) => {
-    io.to(tripId).emit('tripEnded'); 
+      io.to(tripId).emit('tripEnded'); 
   });
 
-  // --- SOS HANDLER ---
+  // 4. SOS Triggered (Danger)
   socket.on('sosTriggered', (tripId) => {
-      console.log(`🚨 SOS SIGNAL for Trip ${tripId}`);
-      // Notify everyone tracking
+      console.log(`🚨 SOS ON: ${tripId}`);
       io.to(tripId).emit('sosAlert'); 
   });
 
-  socket.on('disconnect', () => {});
+  // 5. SOS Cancelled (I'm Safe)
+  socket.on('sosCancelled', (tripId) => {
+      console.log(`💚 SOS CLEARED: ${tripId}`);
+      io.to(tripId).emit('sosClear'); 
+  });
 });
 
 const PORT = process.env.PORT || 5000;
