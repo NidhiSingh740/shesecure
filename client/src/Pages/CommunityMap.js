@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-// Use your IP
-const API_URL = 'http://172.18.24.204:5000';
+const API_URL = 'http://172.18.24.204:5000'; // Your IP
 
 const MapStyles = () => (
   <style>{`
@@ -32,14 +30,55 @@ const CommunityMap = () => {
     const [reportMode, setReportMode] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [newCoords, setNewCoords] = useState(null);
+    const [currentUserId, setCurrentUserId] = useState(null);
+    
+    // Form State
     const [type, setType] = useState('harassment');
     const [desc, setDesc] = useState('');
 
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
+    const markersRef = useRef([]);
 
+    // 1. Get User ID from Token
     useEffect(() => {
-        axios.get(`${API_URL}/api/incidents`).then(res => setIncidents(res.data)).catch(console.error);
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                // Decode token to get user ID payload
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                const payload = JSON.parse(jsonPayload);
+                setCurrentUserId(payload.user.id);
+            } catch (e) {
+                console.error("Token decode error", e);
+            }
+        }
+    }, []);
+
+    // 2. Fetch Incidents & Setup Delete Handler
+    useEffect(() => {
+        const fetchIncidents = () => {
+            axios.get(`${API_URL}/api/incidents`).then(res => setIncidents(res.data)).catch(console.error);
+        };
+        fetchIncidents();
+
+        // ** Global function for popup button to call **
+        window.handleDeleteIncident = async (id) => {
+            const token = localStorage.getItem('token');
+            if(!token || !window.confirm("Are you sure you want to delete this report?")) return;
+            
+            try {
+                await axios.delete(`${API_URL}/api/incidents/${id}`, { headers: { 'x-auth-token': token } });
+                alert("Report deleted.");
+                fetchIncidents(); // Refresh map
+            } catch(e) {
+                alert("Failed to delete. You might not be the owner.");
+            }
+        };
 
         loadLeaflet(() => {
             if(window.L && mapRef.current && !mapInstance.current) {
@@ -49,7 +88,6 @@ const CommunityMap = () => {
                 mapInstance.current = map;
 
                 map.on('click', (e) => {
-                    // Use closure-independent check or ref
                     if (window.reportModeActive) { 
                         setNewCoords(e.latlng);
                         setShowForm(true);
@@ -61,9 +99,15 @@ const CommunityMap = () => {
         });
     }, []);
 
+    // 3. Update Markers
     useEffect(() => {
         if(mapInstance.current && window.L) {
             const L = window.L;
+            
+            // Clear old markers
+            markersRef.current.forEach(m => m.remove());
+            markersRef.current = [];
+
             incidents.forEach(inc => {
                 let colorUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
                 if (inc.type === 'lighting') colorUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png';
@@ -74,12 +118,25 @@ const CommunityMap = () => {
                     iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
                 });
                 
-                L.marker([inc.location.lat, inc.location.lng], {icon})
+                // ** LOGIC: If I own this report, show Delete button **
+                const isOwner = currentUserId === inc.userId;
+                const deleteBtn = isOwner ? `<br><button onclick="window.handleDeleteIncident('${inc._id}')" style="background:#dc3545; color:white; border:none; border-radius:4px; padding:5px 10px; margin-top:5px; cursor:pointer; width:100%;">Delete</button>` : '';
+
+                const marker = L.marker([inc.location.lat, inc.location.lng], {icon})
                  .addTo(mapInstance.current)
-                 .bindPopup(`<b>${inc.type.toUpperCase()}</b><br/>${inc.description}<br/><small>${new Date(inc.timestamp).toLocaleDateString()}</small>`);
+                 .bindPopup(`
+                    <div style="font-family:sans-serif;">
+                        <b style="text-transform:uppercase; color:#333;">${inc.type}</b>
+                        <p style="margin:5px 0;">${inc.description}</p>
+                        <small style="color:#666;">${new Date(inc.timestamp).toLocaleDateString()}</small>
+                        ${deleteBtn}
+                    </div>
+                 `);
+                
+                markersRef.current.push(marker);
             });
         }
-    }, [incidents]);
+    }, [incidents, currentUserId]);
 
     const enableReportMode = () => {
         setReportMode(true);
@@ -93,8 +150,11 @@ const CommunityMap = () => {
             await axios.post(`${API_URL}/api/incidents`, {
                 type, description: desc, lat: newCoords.lat, lng: newCoords.lng
             }, { headers: { 'x-auth-token': token } });
+            
             setShowForm(false); setDesc(''); alert("Report Submitted!");
-            const res = await axios.get(`${API_URL}/api/incidents`); setIncidents(res.data);
+            // Refresh list
+            const res = await axios.get(`${API_URL}/api/incidents`);
+            setIncidents(res.data);
         } catch(e) { alert("Failed to submit"); }
     };
 
@@ -102,14 +162,29 @@ const CommunityMap = () => {
         <div className="community-container">
             <MapStyles />
             {reportMode && <div className="instruction-banner">Click on the map location to report incident</div>}
+            
             <div ref={mapRef} className="map-full"></div>
+            
             {!showForm && <button className="report-btn-float" onClick={enableReportMode}>⚠️ Report Incident</button>}
+
             {showForm && (
                 <div className="report-modal">
                     <h3>Report Unsafe Area</h3>
-                    <div className="form-group"><label>Type</label><select value={type} onChange={e => setType(e.target.value)}><option value="harassment">Harassment</option><option value="lighting">Poor Lighting</option><option value="theft">Theft</option><option value="accident">Accident Prone</option></select></div>
-                    <div className="form-group"><label>Description</label><textarea rows="3" value={desc} onChange={e => setDesc(e.target.value)}></textarea></div>
-                    <button className="btn-submit" onClick={submitReport}>Submit</button>
+                    <div className="form-group">
+                        <label>Type</label>
+                        <select value={type} onChange={e => setType(e.target.value)}>
+                            <option value="harassment">Harassment</option>
+                            <option value="lighting">Poor Lighting</option>
+                            <option value="theft">Theft/Snatching</option>
+                            <option value="accident">Accident Prone</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Description</label>
+                        <textarea rows="3" value={desc} onChange={e => setDesc(e.target.value)} placeholder="Describe what happened..."></textarea>
+                    </div>
+                    <button className="btn-submit" onClick={submitReport}>Submit Report</button>
                     <button className="btn-cancel" onClick={() => setShowForm(false)}>Cancel</button>
                 </div>
             )}
