@@ -15,9 +15,12 @@ import Login from './Pages/Login';
 import Logout from './Pages/Logout';
 import Dashboard from './Pages/Dashboard';
 import ManageContacts from './Pages/ManageContacts';
-// Import the security component
-import PrivateRoute from './components/PrivateRoute';
 import TrackTripPage from './Pages/TrackTripPage';
+
+// --- NEW IMPORTS ---
+import CommunityMap from './Pages/CommunityMap'; // Step 6 Feature
+import PrivateRoute from './components/PrivateRoute';
+import NotificationListener from './components/NotificationListener'; // Critical for SOS
 
 const LandingPage = () => (
   <>
@@ -29,14 +32,15 @@ const LandingPage = () => (
   </>
 );
 
-
-
-
 function App() {
   return (
     <Router>
       <div className="App">
         <Header />
+        
+        {/* Global Listener: This ensures SOS alerts pop up on ANY page */}
+        <NotificationListener />
+
         <main>
           <Routes>
             {/* --- Public Routes --- */}
@@ -44,27 +48,36 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
+            
+            {/* Public Tracking Link */}
             <Route path="/track/:tripId" element={<TrackTripPage />} />
-                                                                                                   {/* --- Protected Routes --- */}
+
+            {/* --- Protected Routes --- */}
             <Route 
-              path="/dashboard"
+              path="/dashboard" 
               element={
                 <PrivateRoute>
                   <Dashboard />
-                 
                 </PrivateRoute>
               } 
             />
-            {/* Corrected the syntax error by removing the invalid comment */}
             <Route 
-              path="/contacts"
+              path="/contacts" 
               element={
                 <PrivateRoute>
                   <ManageContacts />
                 </PrivateRoute>
               } 
             />
-            
+             {/* New Community Map Route */}
+            <Route 
+              path="/community-map" 
+              element={
+                <PrivateRoute>
+                  <CommunityMap />
+                </PrivateRoute>
+              } 
+            />
           </Routes>
         </main>
         <Footer />
@@ -74,4 +87,3 @@ function App() {
 }
 
 export default App;
-

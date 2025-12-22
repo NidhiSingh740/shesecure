@@ -6,7 +6,7 @@ import { io } from 'socket.io-client';
 // --- CONFIG ---
 const API_URL = 'http://172.18.24.204:5000'; // Your IP
 
-// --- STYLES (Beautified) ---
+// --- STYLES (Beautified + Safety Score Styles) ---
 const DashboardStyles = () => (
   <style>{`
     /* Layout */
@@ -14,12 +14,12 @@ const DashboardStyles = () => (
     .map-column { flex: 3; background-color: #e9ecef; position: relative; }
     .controls-column { 
       flex: 2; 
-      background-color: #f8f9fa; /* Light grey background for column */
+      background-color: #f8f9fa; 
       padding: 2rem; 
       display: flex; 
       flex-direction: column; 
       overflow-y: auto; 
-      gap: 1.5rem; /* Space between cards */
+      gap: 1.5rem; 
     }
     
     /* Card Component Style */
@@ -140,7 +140,7 @@ const DashboardStyles = () => (
     .trip-actions { display: flex; gap: 1rem; margin-top: 1rem; }
     .share-button { flex: 1; padding: 12px; background: #e7f5ff; color: #007bff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
     .share-button:hover { background: #d0ebff; }
-    .end-trip-button { flex: 1; padding: 12px; background: #ffe3e3; color: #e03131; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    .end-trip-button { flex: 1; padding: 12px; background: #ffe3e3; color: #e03131; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
     .end-trip-button:hover { background: #ffc9c9; }
 
     /* SOS Floating Button */
@@ -174,6 +174,14 @@ const DashboardStyles = () => (
 
     .search-error { color: #dc3545; font-size: 0.9rem; margin-top: 5px; }
     .error-text { color: #dc3545; text-align: center; }
+
+    /* --- STEP 7: SAFETY SCORE CARD STYLES --- */
+    .safety-card { padding: 1rem; border-radius: 10px; margin-bottom: 1rem; text-align: center; border: 1px solid transparent; }
+    .safety-score-high { background: #d1fae5; border-color: #10b981; color: #065f46; } /* Green */
+    .safety-score-med { background: #fef3c7; border-color: #f59e0b; color: #92400e; } /* Yellow */
+    .safety-score-low { background: #fee2e2; border-color: #ef4444; color: #991b1b; } /* Red */
+    .score-value { font-size: 2.2rem; font-weight: 800; display: block; margin: 5px 0; }
+    .score-label { font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; opacity: 0.8; }
   `}</style>
 );
 
@@ -262,8 +270,8 @@ const MapView = ({ userPosition, destination }) => {
   return <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
-// --- BEFORE TRIP PANEL ---
-const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearch, results, onSelectDest, dest, onStart, searchError, setSafeCheckInterval }) => (
+// --- BEFORE TRIP PANEL (Now includes Safety Score Card) ---
+const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearch, results, onSelectDest, dest, onStart, searchError, setSafeCheckInterval, safetyScore }) => (
     <div className="panel-container">
         {/* Card 1: Trip Planning */}
         <div className="dashboard-card trip-planning-module">
@@ -288,6 +296,17 @@ const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearc
               </div>
             )}
             
+            {/* --- STEP 7: SAFETY SCORE CARD --- */}
+            {dest && safetyScore !== null && (
+                <div className={`safety-card ${safetyScore >= 75 ? 'safety-score-high' : safetyScore >= 40 ? 'safety-score-med' : 'safety-score-low'}`}>
+                    <small className="score-label">Route Safety Score</small>
+                    <span className="score-value">{safetyScore}/100</span>
+                    <p style={{margin:0, fontSize:'0.9rem', fontWeight:600}}>
+                        {safetyScore >= 75 ? "Safe Route ✅" : safetyScore >= 40 ? "Moderate Caution ⚠️" : "High Risk Area ⛔"}
+                    </p>
+                </div>
+            )}
+
             <div style={{margin: '15px 0'}}>
                 <label>Safe Check Interval:</label>
                 <select style={{width:'100%', padding:'12px', borderRadius:'8px', border:'1px solid #ced4da', background:'white'}} onChange={(e) => setSafeCheckInterval(e.target.value)}>
@@ -380,7 +399,9 @@ const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onSOS, safeCheckSec
                         {contacts.length === 0 ? <p>No contacts found.</p> : contacts.map(c => (
                             <div key={c._id} className="share-item">
                                 <div><strong>{c.name}</strong><br/><small style={{color:'#888'}}>{c.phone}</small></div>
-                                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>Share on WhatsApp</button>
+                                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>
+                                    Share on WhatsApp
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -390,7 +411,7 @@ const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onSOS, safeCheckSec
     );
 };
 
-// --- DASHBOARD CONTROLLER ---
+// --- MAIN DASHBOARD CONTROLLER ---
 const Dashboard = () => {
   const [isActive, setIsActive] = useState(false);
   const [contacts, setContacts] = useState([]);
@@ -405,6 +426,9 @@ const Dashboard = () => {
   const [safeCheckInterval, setSafeCheckInterval] = useState(null);
   const [safeCheckSeconds, setSafeCheckSeconds] = useState(null);
   const [sosCountdown, setSosCountdown] = useState(null);
+  
+  // Step 7: Safety Score State
+  const [safetyScore, setSafetyScore] = useState(null);
 
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
@@ -413,7 +437,6 @@ const Dashboard = () => {
   useEffect(() => {
     socketRef.current = io(API_URL);
 
-    // FIX: Enable High Accuracy for precise location (MMMUT instead of City center)
     navigator.geolocation.getCurrentPosition(
       (p) => setUserPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
       (e) => console.error("Loc Error", e),
@@ -459,8 +482,43 @@ const Dashboard = () => {
       return () => clearInterval(t);
   }, [sosCountdown]);
 
+  // Step 7: Safety Score Logic
+  // This uses a Haversine formula to count incidents within 2km radius
+  const calculateSafetyScore = async (destLat, destLon) => {
+      try {
+          // In a real app, send dest to backend. For demo, we fetch all and calc client-side
+          const res = await axios.get(`${API_URL}/api/incidents`);
+          const incidents = res.data;
+          
+          let nearbyCount = 0;
+          // Haversine calc
+          const R = 6371; // km
+          incidents.forEach(inc => {
+              const dLat = (inc.location.lat - destLat) * Math.PI / 180;
+              const dLon = (inc.location.lng - destLon) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(destLat * Math.PI / 180) * Math.cos(inc.location.lat * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              const d = R * c;
+              if (d < 2) nearbyCount++; // Incidents within 2km
+          });
+
+          // Score out of 100. Minus 15 points per incident.
+          let score = 100 - (nearbyCount * 15);
+          if (score < 30) score = 30; // Min floor
+          setSafetyScore(score);
+      } catch (e) { console.error("Score Error", e); setSafetyScore(null); }
+  };
+
   const handleSearch = async () => {
     try { const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`); setResults(res.data); } catch(e){}
+  };
+
+  const handleSelectDest = (d) => {
+      setDestination(d);
+      // Trigger score calculation when destination selected
+      calculateSafetyScore(parseFloat(d.lat), parseFloat(d.lon));
   };
 
   const startTrip = async () => {
@@ -468,16 +526,19 @@ const Dashboard = () => {
     const token = localStorage.getItem('token');
     try {
         const res = await axios.post(`${API_URL}/api/trips/start`, { destination: { name: destination.display_name, lat: destination.lat, lon: destination.lon } }, { headers: { 'x-auth-token': token } });
+        
         setTripDetails(res.data);
         setIsActive(true);
         if (safeCheckInterval) setSafeCheckSeconds(parseInt(safeCheckInterval) * 60);
 
         socketRef.current.emit('joinTripRoom', res.data._id);
+        
         watchIdRef.current = navigator.geolocation.watchPosition(p => {
              const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
              setUserPos(coords);
              socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
         }, console.error, { enableHighAccuracy: true });
+
     } catch(e) { alert("Error starting trip"); }
   };
 
@@ -505,7 +566,7 @@ const Dashboard = () => {
     socketRef.current.emit('endTrip', tripDetails._id);
     const token = localStorage.getItem('token');
     try { await axios.post(`${API_URL}/api/trips/${tripDetails._id}/end`, {}, { headers: { 'x-auth-token': token } }); } catch(e) {}
-    setIsActive(false); setTripDetails(null); setDestination(null); setSearchTerm(''); setResults([]);
+    setIsActive(false); setTripDetails(null); setDestination(null); setSearchTerm(''); setResults([]); setSafetyScore(null);
     alert("Trip ended safely.");
   };
 
@@ -527,11 +588,14 @@ const Dashboard = () => {
           <BeforeTripPanel
             contacts={contacts} loading={loading} searchTerm={searchTerm}
             setSearchTerm={setSearchTerm} onSearch={handleSearch} results={results}
-            onSelectDest={setDestination} dest={destination} onStart={startTrip} searchError={searchError}
+            onSelectDest={handleSelectDest} dest={destination} onStart={startTrip} searchError={searchError}
             setSafeCheckInterval={setSafeCheckInterval}
+            safetyScore={safetyScore}
           />
         )}
       </div>
+
+      {/* SOS COUNTDOWN OVERLAY */}
       {sosCountdown !== null && (
           <div className="sos-countdown-overlay">
               <h1 style={{fontSize:'3rem', marginBottom:'20px'}}>SENDING SOS IN...</h1>
