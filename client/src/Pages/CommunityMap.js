@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://172.18.24.204:5000'; // Your IP
+const API_URL = 'http://172.18.24.111:5000'; // Your IP
 
 const MapStyles = () => (
   <style>{`

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const API_URL = 'http://172.18.24.204:5000';
+const API_URL = 'http://172.18.24.111:5000';
 
 const TrackTripPage = () => {
   const { tripId } = useParams();
