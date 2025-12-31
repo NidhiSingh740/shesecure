@@ -8,7 +8,8 @@ const { Server } = require("socket.io");
 const authRoutes = require('./routes/auth');
 const contactRoutes = require('./routes/contacts');
 const tripRoutes = require('./routes/trips');
-const incidentRoutes = require('./routes/incidents'); // NEW
+const incidentRoutes = require('./routes/incidents');
+const zoneRoutes = require('./routes/zones'); // Import Zones
 const Trip = require('./models/Trip');
 
 const app = express();
@@ -32,7 +33,8 @@ mongoose.connect(dbURI)
 app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/trips', tripRoutes);
-app.use('/api/incidents', incidentRoutes); // NEW ROUTE
+app.use('/api/incidents', incidentRoutes);
+app.use('/api/zones', zoneRoutes); // Use Zones
 
 // --- SOCKET LOGIC ---
 io.on('connection', (socket) => {
@@ -51,9 +53,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sosCancelled', (tripId) => io.to(tripId).emit('sosClear'));
+
+  // --- NOTIFICATION LOGIC ---
+  socket.on('zoneAlert', ({ tripId, message, type }) => {
+      // Relay "Arrived at Home" to contacts
+      io.to(tripId).emit('receiveZoneAlert', { message, type });
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-
-

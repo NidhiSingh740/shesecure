@@ -1,4 +1,5 @@
 
+// server/routes/contacts.js
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth'); // Your existing auth middleware
