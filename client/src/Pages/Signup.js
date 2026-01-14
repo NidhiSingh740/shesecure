@@ -3,31 +3,43 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
 // --- Styles (Embedded for simplicity) ---
+
+
 const SignupStyles = () => (
     <style>
         {`
           /* --- Authentication Page Styles --- */
-         .auth-container {
-  display: flex;
-  justify-content: right;
-  align-items: flex-start;   /* keeps it near the top instead of perfectly centered */
-  padding: 2rem 1rem;        /* adjust padding to control top space */
-  min-height: auto;          /* remove full screen height */
-  height: auto;              /* let it shrink naturally */
-}
+          .auth-container {
+            display: flex;
+            
+            /* --- CHANGED: Align items to the start (Left) instead of right --- */
+            justify-content: flex-start; 
+            
+            align-items: flex-start;  
+            padding: 2rem 1rem;       
+            min-height: 100vh;        
+            width: 100%;
+            
+            /* Background Image configuration */
+            background-image: url('/shesecure.png'); 
+            background-size: cover;    
+            background-position: center; 
+            background-repeat: no-repeat;
+          }
 
-.auth-form-wrapper {
-  background: #ffffff;
-  padding: 0.5rem 2rem;      /* reduced padding inside the box */
-  border-radius: 18px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  width: 50%;
-  max-width: 380px;
-  text-align: center;
-  margin-top: 60px;  
-   margin-right: 12%; 
-  /* distance from navbar */
-}
+          .auth-form-wrapper {
+            background: #ffffff;
+            padding: 0.5rem 2rem;      
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            width: 50%;
+            max-width: 380px;
+            text-align: center;
+            margin-top: 60px;  
+            
+            /* --- CHANGED: Spacing from the left side now --- */
+            margin-left: 12%; 
+          }
 
           .auth-form-wrapper h2 { font-size: 2rem; color: #333; margin-bottom: 0.5rem; font-weight: 700; }
           .auth-subtext { color: #666; margin-bottom: 2rem; }
@@ -66,15 +78,13 @@ const Signup = () => {
         }
 
         try {
-            // FIX: The request body is now simpler, with no 'role' field.
             const response = await axios.post('http://localhost:5000/api/auth/signup', {
                 fullName,
                 email,
                 password,
             });
 
-            // Show a success alert and navigate immediately.
-            alert(response.data.msg); // Shows "Registration successful! Please login."
+            alert(response.data.msg); 
             navigate('/login');
 
         } catch (err) {
@@ -140,4 +150,3 @@ const Signup = () => {
 };
 
 export default Signup;
-

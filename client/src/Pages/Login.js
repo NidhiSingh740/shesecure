@@ -5,13 +5,27 @@ import { saveAuthToken } from "../utils/auth"; // ✅ imported
 const LoginStyles = () => (
   <style>
     {`
+      /* --- Authentication Page Styles --- */
       .auth-container {
         display: flex;
-        justify-content: right;
+        
+        /* --- CHANGED: Align items to the start (Left) --- */
+        justify-content: flex-start;
+        
         align-items: flex-start;
         padding: 2rem 1rem;
-        min-height: auto;
-        height: auto;
+        
+        /* --- BACKGROUND IMAGE UPDATE START --- */
+        /* Ensure the container takes full screen height so the image covers everything */
+        min-height: 100vh;
+        width: 100%;
+        
+        /* Accessing image from public folder */
+        background-image: url('/shesecure.png');
+        background-size: cover;    /* Scales image to fill screen */
+        background-position: center;
+        background-repeat: no-repeat;
+        /* --- BACKGROUND IMAGE UPDATE END --- */
       }
 
       .auth-form-wrapper {
@@ -23,7 +37,9 @@ const LoginStyles = () => (
         max-width: 350px;
         text-align: center;
         margin-top: 60px;
-        margin-right: 12%;
+        
+        /* --- CHANGED: Spacing from the left side --- */
+        margin-left: 12%;
       }
 
       .auth-form-wrapper h2 {
