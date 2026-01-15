@@ -133,7 +133,8 @@ const DashboardStyles = () => (
     }
 
     .search-input-group button {
-      background: linear-gradient(135deg, #be185d, #a21caf);
+       background: linear-gradient(90deg, #b8369a, #6a11cb);
+
       color: white;
       border: none;
       border-radius: 10px;
@@ -632,19 +633,29 @@ const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearc
                     </div>
                 )}
 
-                <div style={{margin: '15px 0'}}>
-                    <label>Safe Check Interval:</label>
-                    <select style={{width:'100%', padding:'12px', borderRadius:'8px', border:'1px solid #ced4da', background:'white'}} onChange={(e) => setSafeCheckInterval(e.target.value)}>
-                        <option value="">Off (Manual SOS only)</option>
-                        <option value="1">1 Minute (Test)</option>
-                        <option value="15">15 Minutes</option>
-                        <option value="30">30 Minutes</option>
-                    </select>
-                </div>
+               <div style={{ margin: '15px 0' }}>
+    <label>Safe Check Interval:</label>
+    <input
+        type="number"
+        placeholder="Enter time duration (in minutes)"
+        onChange={(e) => setSafeCheckInterval(e.target.value)}
+        style={{
+            width: '100%',
+            padding: '12px',
+            borderRadius: '8px',
+            border: '1px solid #ced4da',
+            background: 'white',
+            fontFamily: "'Poppins', sans-serif",
+            fontSize: '0.95rem',
+            outline: 'none'
+        }}
+    />
+</div>
+
 
                 <div className="zone-btn-row">
                     <button className="start-trip-button" onClick={onStart} disabled={!dest}>Start SafeWalk Trip</button>
-                    <button className="start-trip-button" onClick={toggleZoneMode} style={{background:'#6c757d', width:'35%'}}>+ Add Zone</button>
+                    <button className="start-trip-button" onClick={toggleZoneMode} style={{background:'linear-gradient(90deg, #b8369a, #6a11cb)', width:'35%'}}>+ Add Zone</button>
                 </div>
             </div>
           )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import "./style/Header.css";
 
 // --- AUTH HELPERS ---
 const getAuthToken = () => localStorage.getItem('token');
