@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const API_URL = 'http://172.18.24.116:5000'; // Ensure this matches your IP
+const API_URL = 'http://172.18.24.167:5000'; // Ensure this matches your IP
 
 // --- STYLES ---
 const TrackStyles = () => (
