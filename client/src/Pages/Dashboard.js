@@ -34,7 +34,7 @@ const DashboardStyles = () => (
     /* --- GLOBAL LAYOUT & THEME --- */
     .dashboard-layout {
       display: flex;
-      height: calc(100vh - 70px);
+      height: calc(100vh - 70px); /* Standard Desktop Height */
       background-color: #fce7f3; 
       position: relative;
       font-family: 'Poppins', sans-serif;
@@ -85,22 +85,25 @@ const DashboardStyles = () => (
     .card-header h3 {
       margin: 0;
       font-size: 1.1rem;
-      color: #831843; 
+      color: #b8369a; 
       font-weight: 700;
     }
 
     .manage-link {
       text-decoration: none;
-      color: #db2777;
+      color: #b8369a; /* Fallback */
+      background: -webkit-linear-gradient(0deg, #b8369a, #6a11cb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
       padding: 4px 10px;
-      background: #fdf2f8;
+      background-color: #fdf2f8; /* BG is separate from text gradient */
       border-radius: 20px;
       transition: all 0.2s;
     }
-    .manage-link:hover { background-color: #fce7f3; color: #be185d; }
+    .manage-link:hover { background-color: #fce7f3; }
 
     /* --- INPUTS & FORMS --- */
     .destination-form label {
@@ -130,11 +133,11 @@ const DashboardStyles = () => (
       font-size: 0.95rem;
       outline: none;
       font-family: 'Poppins', sans-serif;
+      min-width: 0; /* Fix flex overflow */
     }
 
     .search-input-group button {
-       background: linear-gradient(90deg, #b8369a, #6a11cb);
-
+      background: linear-gradient(90deg, #b8369a, #6a11cb);
       color: white;
       border: none;
       border-radius: 10px;
@@ -142,6 +145,7 @@ const DashboardStyles = () => (
       cursor: pointer;
       font-weight: 600;
       transition: filter 0.2s;
+      white-space: nowrap;
     }
     .search-input-group button:hover { filter: brightness(1.1); }
 
@@ -191,6 +195,7 @@ const DashboardStyles = () => (
       margin-right: 15px;
       font-size: 1rem;
       box-shadow: 0 4px 10px rgba(192, 132, 252, 0.3);
+      flex-shrink: 0;
     }
     
     .contact-details strong { display: block; color: #1f2937; font-size: 0.95rem; }
@@ -201,7 +206,7 @@ const DashboardStyles = () => (
       width: 100%;
       padding: 16px;
       margin-top: 15px;
-      background: linear-gradient(135deg, #db2777 0%, #7e22ce 100%); /* Pink to Purple */
+      background: linear-gradient(135deg, #db2777 0%, #7e22ce 100%);
       color: white;
       border: none;
       border-radius: 16px;
@@ -249,12 +254,11 @@ const DashboardStyles = () => (
       margin-top: 5px;
     }
 
-    /* MODIFIED: Trip Actions Row (Share & End) */
     .trip-actions { display: flex; gap: 1rem; margin-top: 1rem; }
     
     .share-button {
       flex: 1;
-      padding: 8px;
+      padding: 12px 8px; /* Increased padding for touch */
       background: white;
       color: #db2777;
       border: 1px solid #fbcfe8;
@@ -263,12 +267,13 @@ const DashboardStyles = () => (
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 4px 12px rgba(219, 39, 119, 0.1);
+      display: flex; justify-content: center; align-items: center; gap: 5px;
     }
     .share-button:hover { background: #fff1f2; transform: translateY(-2px); }
 
     .end-trip-button {
       flex: 1;
-      padding: 8px;
+      padding: 12px 8px; /* Increased padding for touch */
       background: linear-gradient(135deg, #be123c, #881337);
       color: white;
       border: none;
@@ -279,36 +284,33 @@ const DashboardStyles = () => (
       transition: all 0.2s;
     }
 
-    /* MODIFIED: I'M SAFE BUTTON */
     .btn-im-safe {
       background: linear-gradient(135deg, #db2777 0%, #7e22ce 100%);
       color: white;
       border: none;
-      padding: 10px 16px; /* CHANGED: Reduced padding for smaller size */
-      width: 30%; /* CHANGED: 30% Width */
+      padding: 10px 16px; 
+      width: 30%;
+      min-width: 120px; /* Ensure minimum click width */
       border-radius: 16px;
       font-weight: 700;
-      font-size: 0.9rem; /* CHANGED: Smaller font */
+      font-size: 0.9rem;
       cursor: pointer;
       box-shadow: 0 6px 20px rgba(219, 39, 119, 0.3);
       transition: transform 0.2s;
-      margin: 0 auto 1rem auto; /* CHANGED: Centered below timer using auto margin */
-      display: block; /* Ensures margin auto works */
+      margin: 0 auto 1rem auto; 
+      display: block; 
     }
     .btn-im-safe:hover { transform: scale(1.02); }
 
-    /* NEW CLASS: Container for Voice and SOS to sit below the actions */
     .secondary-icon-row {
       display: flex;
-      justify-content: space-between; /* Pushes Voice to Left, SOS to Right */
+      justify-content: space-between; 
       align-items: center;
       margin-top: 15px;
-      padding: 0 10px; /* Slight padding to align with buttons above */
+      padding: 0 10px;
     }
 
-    /* MODIFIED: SOS BUTTON (Not Floating anymore) */
     .sos-btn-floating {
-      /* CHANGED: Removed absolute position. Now fits in the row */
       position: static; 
       width: 65px; 
       height: 65px; 
@@ -335,9 +337,7 @@ const DashboardStyles = () => (
       100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
     }
 
-    /* MODIFIED: MIC BUTTON (Not Floating anymore) */
     .mic-btn-floating { 
-      /* CHANGED: Removed special alignment. Flexbox in parent handles it */
       position: static;
       width: 60px; 
       height: 60px; 
@@ -363,7 +363,7 @@ const DashboardStyles = () => (
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
-    /* --- SHARE MODAL --- */
+    /* --- MODAL (DESKTOP DEFAULT) --- */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -393,6 +393,11 @@ const DashboardStyles = () => (
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
 
     .modal-header {
       display: flex;
@@ -412,6 +417,7 @@ const DashboardStyles = () => (
       border-bottom: 1px solid #f9fafb;
       transition: background 0.2s;
       border-radius: 8px;
+      cursor: pointer;
     }
     .share-item:hover { background: #fdf2f8; }
 
@@ -431,7 +437,7 @@ const DashboardStyles = () => (
       box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
     }
 
-    /* --- SAFETY SCORES & ZONES --- */
+    /* --- SAFETY SCORES --- */
     .safety-card {
       padding: 1rem;
       border-radius: 16px;
@@ -466,6 +472,7 @@ const DashboardStyles = () => (
       border-radius: 10px;
       border: 1px solid #e5e7eb;
       font-family: 'Poppins', sans-serif;
+      box-sizing: border-box; /* Fix width issues */
     }
 
     /* --- SOS COUNTDOWN OVERLAY --- */
@@ -475,6 +482,7 @@ const DashboardStyles = () => (
       z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       color: white;
+      text-align: center;
     }
     .countdown-number { font-size: 12rem; font-weight: 800; margin: 20px 0; text-shadow: 0 10px 30px rgba(0,0,0,0.3); }
     .btn-cancel-sos {
@@ -485,6 +493,106 @@ const DashboardStyles = () => (
     }
     .btn-cancel-sos:hover { transform: scale(1.05); }
     .search-error { color: #e11d48; font-size: 0.85rem; margin-top: 8px; font-weight: 500; }
+
+    /* ========================================= */
+    /* === RESPONSIVE TABLET & MOBILE STYLES === */
+    /* ========================================= */
+
+    /* TABLET (Portrait and small Laptop) - approx < 1024px */
+    @media (max-width: 1024px) {
+      .dashboard-layout {
+        flex-direction: column; /* Stack Map and Controls vertically */
+        height: 100vh; /* Use full height */
+      }
+
+      .map-column {
+        flex: none; /* Disable flex scaling */
+        height: 45vh; /* Map takes top 45% */
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+      }
+
+      .controls-column {
+        flex: 1; /* Takes remaining space */
+        min-width: 0; /* Override the desktop min-width */
+        width: 100%;
+        border-radius: 24px 24px 0 0; /* Rounded top for "Sheet" look */
+        margin-top: -24px; /* Pull up to overlap map slightly */
+        padding: 1.5rem;
+        box-sizing: border-box;
+      }
+      
+      .btn-im-safe { width: 40%; }
+      
+      /* Center modal on tablet */
+      .modal-overlay {
+        justify-content: center;
+        padding-right: 0;
+        align-items: center;
+      }
+      .modal-content {
+        width: 60%;
+        animation: slideUp 0.3s ease-out; /* Slide up instead of right */
+      }
+      @keyframes slideInRight { /* Override to standard fade/up */
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+    }
+
+    /* MOBILE PHONE - approx < 768px */
+    @media (max-width: 767px) {
+      .dashboard-layout {
+        height: 100vh;
+        /* Mobile browsers often have dynamic toolbars, dvh is better if supported, else vh */
+        height: 100dvh; 
+      }
+      
+      .map-column {
+        height: 40vh; /* Map slightly smaller on phone to give space to controls */
+      }
+
+      .controls-column {
+        padding: 1.25rem 1rem; /* Less padding on sides */
+        margin-top: -20px;
+        gap: 1rem;
+      }
+
+      .dashboard-card {
+        padding: 1rem; /* Compact card padding */
+        border-radius: 20px;
+      }
+      
+      .card-header h3 { font-size: 1rem; }
+      
+      .timer-display span { font-size: 2.8rem; } /* Smaller timer font */
+      
+      .btn-im-safe { width: 60%; font-size: 0.85rem; }
+      
+      .secondary-icon-row { margin-top: 10px; }
+      .sos-btn-floating { width: 55px; height: 55px; font-size: 0.9rem; }
+      .mic-btn-floating { width: 50px; height: 50px; font-size: 1.2rem; }
+
+      /* Mobile Modal - Bottom Sheet Style */
+      .modal-overlay {
+        align-items: flex-end; /* Align to bottom */
+        padding: 0;
+      }
+      .modal-content {
+        width: 100%; /* Full width */
+        border-radius: 24px 24px 0 0; /* Rounded top only */
+        padding: 1.5rem;
+        margin: 0;
+        box-sizing: border-box;
+        animation: slideUp 0.3s ease-out;
+      }
+
+      .countdown-number { font-size: 7rem; } /* Fix giant SOS number overflow */
+      .btn-cancel-sos { padding: 15px 30px; font-size: 1.1rem; }
+      
+      .search-input-group button { padding: 0 0.8rem; font-size: 0.9rem; }
+    }
   `}</style>
 );
 // --- LOAD LEAFLET ---
@@ -592,7 +700,7 @@ const MapView = ({ userPosition, destination, zones, onMapClick, isZoneMode }) =
   return <div ref={mapContainerRef} style={{ width: '100%', height: '100%', cursor: isZoneMode ? 'crosshair' : 'grab' }} />;
 };
 
-const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearch, results, onSelectDest, dest, onStart, searchError, setSafeCheckInterval, safetyScore, toggleZoneMode, isZoneMode }) => (
+const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearch, results, onSelectDest, dest, onStart, searchError, setSafeCheckInterval, setSafeCheckUnit, safeCheckUnit, safetyScore, toggleZoneMode, isZoneMode }) => (
     <div className="panel-container">
         <div className="dashboard-card trip-planning-module">
           <div className="card-header"><h3>Start a New Trip</h3></div>
@@ -633,25 +741,36 @@ const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearc
                     </div>
                 )}
 
-               <div style={{ margin: '15px 0' }}>
-    <label>Safe Check Interval:</label>
-    <input
-        type="number"
-        placeholder="Enter time duration (in minutes)"
-        onChange={(e) => setSafeCheckInterval(e.target.value)}
-        style={{
-            width: '100%',
-            padding: '12px',
-            borderRadius: '8px',
-            border: '1px solid #ced4da',
-            background: 'white',
-            fontFamily: "'Poppins', sans-serif",
-            fontSize: '0.95rem',
-            outline: 'none'
-        }}
-    />
-</div>
-
+                {/* --- UNIT SELECTOR SECTION --- */}
+                <div style={{ margin: '15px 0' }}>
+                    <label>Safe Check Interval:</label>
+                    <div style={{display:'flex', gap:'10px'}}>
+                        <input
+                            type="number"
+                            placeholder="Enter time duration"
+                            onChange={(e) => setSafeCheckInterval(e.target.value)}
+                            style={{
+                                width: '70%',
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: '1px solid #ced4da',
+                                background: 'white',
+                                fontFamily: "'Poppins', sans-serif",
+                                fontSize: '0.95rem',
+                                outline: 'none'
+                            }}
+                        />
+                        <select 
+                            style={{width:'30%', padding:'12px', borderRadius:'8px', border:'1px solid #ced4da', background:'white', outline:'none', fontFamily:"'Poppins', sans-serif"}} 
+                            value={safeCheckUnit}
+                            onChange={(e) => setSafeCheckUnit(e.target.value)}
+                        >
+                            <option value="minutes">Mins</option>
+                            <option value="hours">Hours</option>
+                            <option value="days">Days</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div className="zone-btn-row">
                     <button className="start-trip-button" onClick={onStart} disabled={!dest}>Start SafeWalk Trip</button>
@@ -690,7 +809,19 @@ const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onSOS, safeCheckSec
         return () => clearInterval(i);
     }, [tripDetails]);
 
-    const format = (s) => new Date(s * 1000).toISOString().substr(11, 8);
+    const formatElapsedTime = (s) => new Date(s * 1000).toISOString().substr(11, 8);
+
+    const formatCountdown = (seconds) => {
+        if (isNaN(seconds) || seconds === null || seconds < 0) return "00:00";
+        const d = Math.floor(seconds / (3600 * 24));
+        const h = Math.floor((seconds % (3600 * 24)) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+
+        if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
+        if (h > 0) return `${h}h ${m}m ${s}s`;
+        return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    };
 
     const handleWhatsAppShare = (contact) => {
         const link = `${window.location.origin}/track/${tripDetails._id}`;
@@ -716,27 +847,29 @@ const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onSOS, safeCheckSec
                     <div className="safe-check-box">
                         <small style={{fontWeight:'bold', color:'#856404'}}>SAFE CHECK IN</small>
                         <span className="safe-timer" style={{color: safeCheckSeconds < 30 ? '#dc3545' : '#856404'}}>
-                            {Math.floor(safeCheckSeconds / 60)}:{String(safeCheckSeconds % 60).padStart(2,'0')}
+                            {formatCountdown(safeCheckSeconds)}
                         </span>
                         <button className="btn-im-safe" onClick={handleImSafe}>I'm Safe</button>
                     </div>
                 )}
 
-                <div className="timer-display"><p>ELAPSED TIME</p><span>{format(time)}</span></div>
+                <div className="timer-display"><p>ELAPSED TIME</p><span>{formatElapsedTime(time)}</span></div>
                 
                 <div className="trip-actions">
                     <button className="share-button" onClick={() => setShowModal(true)}>Share Link</button>
                     <button className="end-trip-button" onClick={onEndTrip}>End Trip</button>
+                </div>
 
-            <button className="sos-btn-floating" onClick={onSOS}>SOS</button>
-            
-            {/* FIX 3: VOICE MIC BUTTON - VISIBLE ONLY DURING TRIP */}
-            <button className={`mic-btn-floating ${isVoiceListening ? 'mic-active' : ''}`} onClick={toggleVoiceMode}>
-                 {isVoiceListening ? '🎙️' : '🔇'}
-            </button>
+                <div className="secondary-icon-row">
+                    <button className="sos-btn-floating" onClick={onSOS}>SOS</button>
+                    
+                    {isVoiceListening !== undefined && (
+                    <button className={`mic-btn-floating ${isVoiceListening ? 'mic-active' : ''}`} onClick={toggleVoiceMode}>
+                        {isVoiceListening ? '🎙️' : '🔇'}
+                    </button>
+                    )}
                 </div>
             </div>
-
 
             {showModal && (
                 <div className="modal-overlay">
@@ -771,7 +904,9 @@ const Dashboard = () => {
   const [userPos, setUserPos] = useState({ lat: 26.7606, lng: 83.3732 });
   const [searchError, setSearchError] = useState('');
   
-  const [safeCheckInterval, setSafeCheckInterval] = useState(null);
+  // FIX: Unit Selection State
+  const [safeCheckInterval, setSafeCheckInterval] = useState('');
+  const [safeCheckUnit, setSafeCheckUnit] = useState('minutes');
   const [safeCheckSeconds, setSafeCheckSeconds] = useState(null);
   const [sosCountdown, setSosCountdown] = useState(null);
   const [safetyScore, setSafetyScore] = useState(null);
@@ -835,22 +970,14 @@ const Dashboard = () => {
                   }
               }
           };
-
-          recognitionRef.current.onend = () => {
-              if (isVoiceListening) recognitionRef.current.start();
-          };
+          recognitionRef.current.onend = () => { if (isVoiceListening) recognitionRef.current.start(); };
       }
   }, [isVoiceListening]);
 
   const toggleVoiceMode = () => {
       if (!recognitionRef.current) return alert("Browser does not support Speech");
-      if (isVoiceListening) {
-          recognitionRef.current.stop();
-          setIsVoiceListening(false);
-      } else {
-          recognitionRef.current.start();
-          setIsVoiceListening(true);
-      }
+      if (isVoiceListening) { recognitionRef.current.stop(); setIsVoiceListening(false); }
+      else { recognitionRef.current.start(); setIsVoiceListening(true); }
   };
 
   // 4. GEOFENCING & NOTIFICATIONS
@@ -866,7 +993,6 @@ const Dashboard = () => {
               const msg = zone.type === 'Safe' ? `Arrived at ${zone.name}` : `⚠️ Entering ${zone.name}`;
               setActiveZoneAlert({ type: zone.type, msg });
               setTimeout(() => setActiveZoneAlert(null), 5000);
-              // NOTIFY CONTACTS
               if (isActive && tripDetails && socketRef.current) {
                   socketRef.current.emit('zoneAlert', { tripId: tripDetails._id, message: msg, type: zone.type });
               }
@@ -876,7 +1002,6 @@ const Dashboard = () => {
                   const msg = `Leaving ${zone.name}`;
                   setActiveZoneAlert({ type: 'Danger', msg });
                   setTimeout(() => setActiveZoneAlert(null), 5000);
-                  // NOTIFY CONTACTS
                   if (isActive && tripDetails && socketRef.current) {
                       socketRef.current.emit('zoneAlert', { tripId: tripDetails._id, message: msg, type: 'Danger' });
                   }
@@ -884,7 +1009,6 @@ const Dashboard = () => {
           }
       });
       setInsideZones(currentInside);
-
       if (isActive && tripDetails && destination && tripDetails.startLocation) {
           const dev = getDistanceFromLine(userPos, tripDetails.startLocation, {lat: parseFloat(destination.lat), lng: parseFloat(destination.lon)});
           setRouteDeviationAlert(Math.abs(dev) > 500);
@@ -919,7 +1043,7 @@ const Dashboard = () => {
               const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
               const d = R * c;
               
-              if (d < 2) { // 2km radius
+              if (d < 2) { 
                   nearbyCount++;
                   const type = inc.type ? inc.type.toLowerCase() : '';
                   if (type.includes('theft') || type.includes('harassment') || type.includes('assault')) {
@@ -952,11 +1076,26 @@ const Dashboard = () => {
 
   const handleSelectDest = (d) => { setDestination(d); calculateSafetyScore(parseFloat(d.lat), parseFloat(d.lon)); };
   
+  // FIX: START TRIP TIMER CALCULATION (Respects Units)
   const startTrip = async () => {
     const token = localStorage.getItem('token');
     const res = await axios.post(`${API_URL}/api/trips/start`, { destination: { name: destination.display_name, lat: destination.lat, lon: destination.lon }, startLocation: userPos }, { headers: { 'x-auth-token': token } });
     setTripDetails(res.data); setIsActive(true);
-    if (safeCheckInterval) setSafeCheckSeconds(parseInt(safeCheckInterval) * 60);
+    
+    if (safeCheckInterval) {
+        let multiplier = 60; // Default Minutes
+        if (safeCheckUnit === 'hours') multiplier = 3600;
+        if (safeCheckUnit === 'days') multiplier = 86400;
+        
+        // Ensure parsing is base 10 to avoid any octal issues
+        const val = parseInt(safeCheckInterval, 10);
+        if(!isNaN(val)) {
+            setSafeCheckSeconds(val * multiplier);
+        } else {
+            setSafeCheckSeconds(null);
+        }
+    }
+    
     socketRef.current.emit('joinTripRoom', res.data._id);
     watchIdRef.current = navigator.geolocation.watchPosition(p => {
          const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
@@ -967,11 +1106,22 @@ const Dashboard = () => {
 
   const triggerSOSSequence = () => setSosCountdown(5);
   const sendSOS = async () => { if(tripDetails && socketRef.current) socketRef.current.emit('sosTriggered', tripDetails._id); };
+  
+  // FIX: RESET TIMER ON SAFE (Respects Units)
   const handleImSafe = async () => { 
-      if(safeCheckInterval) setSafeCheckSeconds(parseInt(safeCheckInterval)*60); 
+      if(safeCheckInterval) {
+        let multiplier = 60; 
+        if (safeCheckUnit === 'hours') multiplier = 3600;
+        if (safeCheckUnit === 'days') multiplier = 86400;
+        const val = parseInt(safeCheckInterval, 10);
+        if(!isNaN(val)) {
+            setSafeCheckSeconds(val * multiplier);
+        }
+      }
       if (tripDetails && socketRef.current) socketRef.current.emit('sosCancelled', tripDetails._id);
       alert("Safe status sent."); 
   };
+  
   const endTrip = async () => { 
       if (tripDetails && socketRef.current) socketRef.current.emit('endTrip', tripDetails._id);
       setIsActive(false); setTripDetails(null); setDestination(null); alert("Trip Ended"); setIsVoiceListening(false);
@@ -992,7 +1142,27 @@ const Dashboard = () => {
   };
 
   // TIMERS
-  useEffect(() => { let t; if (isActive && safeCheckSeconds !== null && sosCountdown === null) t = setInterval(() => setSafeCheckSeconds(p => { if (p <= 1) { triggerSOSSequence(); return parseInt(safeCheckInterval) * 60; } return p - 1; }), 1000); return () => clearInterval(t); }, [isActive, safeCheckSeconds, sosCountdown]);
+  useEffect(() => { 
+      let t; 
+      if (isActive && safeCheckSeconds !== null && sosCountdown === null) {
+          t = setInterval(() => {
+             setSafeCheckSeconds(p => { 
+                 if (p <= 1) { 
+                     triggerSOSSequence(); 
+                     // Auto-reset logic logic if needed, currently manual reset via button
+                     // Calculate reset value:
+                     let multiplier = 60; 
+                     if (safeCheckUnit === 'hours') multiplier = 3600;
+                     if (safeCheckUnit === 'days') multiplier = 86400;
+                     return parseInt(safeCheckInterval, 10) * multiplier; 
+                 } 
+                 return p - 1; 
+             });
+          }, 1000); 
+      }
+      return () => clearInterval(t); 
+  }, [isActive, safeCheckSeconds, sosCountdown, safeCheckInterval, safeCheckUnit]);
+
   useEffect(() => { let t; if (sosCountdown !== null) { if (sosCountdown > 0) t = setInterval(() => setSosCountdown(p => p - 1), 1000); else { sendSOS(); setSosCountdown(null); } } return () => clearInterval(t); }, [sosCountdown]);
 
   return (
@@ -1012,11 +1182,17 @@ const Dashboard = () => {
              handleImSafe={handleImSafe} 
              zoneAlert={activeZoneAlert} 
              routeDeviationAlert={routeDeviationAlert}
-             isVoiceListening={isVoiceListening} // Pass state to panel
-             toggleVoiceMode={toggleVoiceMode}   // Pass toggle to panel
+             isVoiceListening={isVoiceListening} 
+             toggleVoiceMode={toggleVoiceMode}   
           />
         ) : (
-          <BeforeTripPanel contacts={contacts} loading={loading} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} results={results} onSelectDest={handleSelectDest} dest={destination} onStart={startTrip} searchError={searchError} setSafeCheckInterval={setSafeCheckInterval} safetyScore={safetyScore} toggleZoneMode={toggleZoneMode} isZoneMode={isZoneMode} />
+          <BeforeTripPanel 
+            contacts={contacts} loading={loading} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} results={results} onSelectDest={handleSelectDest} dest={destination} onStart={startTrip} searchError={searchError} 
+            setSafeCheckInterval={setSafeCheckInterval} 
+            setSafeCheckUnit={setSafeCheckUnit} 
+            safeCheckUnit={safeCheckUnit}
+            safetyScore={safetyScore} toggleZoneMode={toggleZoneMode} isZoneMode={isZoneMode} 
+          />
         )}
       </div>
       {sosCountdown !== null && <div className="sos-countdown-overlay"><h1 style={{fontSize:'3rem'}}>SOS IN...</h1><div className="countdown-number">{sosCountdown}</div><button className="btn-cancel-sos" onClick={() => setSosCountdown(null)}>CANCEL</button></div>}

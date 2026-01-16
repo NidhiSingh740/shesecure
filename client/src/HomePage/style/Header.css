@@ -1,139 +1,183 @@
-/* --- Corrected Header Styles --- */
+/* ===============================
+   GLOBAL RESET
+=============================== */
+html, body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
 
+* { box-sizing: border-box; }
+
+/* ===============================
+   BASE HEADER (DESKTOP)
+=============================== */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px; /* Adjusted padding for a slightly larger default */
-  background: linear-gradient(135deg, #f6f2f4ff, #f1ebf9ff);
-  color: rgb(87, 85, 85);
-  font-family: 'Arial', sans-serif;
+  padding: 0 30px;
+  background-color: rgb(247, 244, 247);
+  font-family: 'Poppins', 'Arial', sans-serif;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 100;
+  height: 70px;
+  z-index: 2000; /* High z-index to stay on top */
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  box-sizing: border-box;
 }
 
 .header .logo {
   font-size: 1.8rem;
-  font-weight: bold;
-  cursor: pointer;
+  font-weight: 800;
+  background: linear-gradient(90deg, #b8369a, #6a11cb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
 }
 
-.header .header-right {
+.header-right {
   display: flex;
   align-items: center;
-  gap: 40px;
-}
-
-.header .nav-links {
-  display: flex;
   gap: 30px;
 }
 
-.header .nav-links a {
-  color: rgb(61, 61, 61);
+/* Nav Links - Desktop Default */
+.nav-links {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #555;
   text-decoration: none;
   font-size: 1rem;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
-.header .nav-links a:hover {
-  color: #212120;
+.nav-links a:hover { color: #b8369a; }
+.nav-item-active { color: #b8369a !important; font-weight: 700 !important; }
+
+/* Buttons & Icons */
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.header .get-started .btn-primary {
-  background-color: #7C4DFF;
+.btn-primary {
+  background: linear-gradient(90deg, #b8369a, #6a11cb);
   color: white;
-  padding: 10px 25px;
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.btn-logout {
+  background-color: #ffe3e3;
+  color: #dc3545;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
   border: none;
-  border-radius: 8px;
-  font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.header .get-started .btn-primary:hover {
-  background-color: #6c40e0;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+/* Hamburger - Hidden on Desktop */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
 }
 
-/* ========================================= */
-/* --- Responsive for Tablets (768px and below) --- */
-/* ========================================= */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column; /* Stacks logo and right-side group vertically */
-    gap: 15px; /* Space between logo and header-right */
-    padding: 15px 25px; /* Slightly less horizontal padding */
-    align-items: flex-start; /* Align content to the left when stacked */
-  }
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
+/* Hamburger Animation */
+.bar.open:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+.bar.open:nth-child(2) { opacity: 0; }
+.bar.open:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+
+/* Menu Overlay (Hidden by default) */
+.menu-overlay { display: none; }
+
+/* ===============================
+   TABLET & MOBILE FIX
+=============================== */
+@media (max-width: 1024px) {
+  .header { padding: 0 20px; }
   
-  .header .header-right {
-    flex-direction: column; /* Stacks nav-links and button vertically */
-    gap: 20px; /* Space between nav-links and button */
-    width: 100%; /* Makes it take full width for better alignment */
-    align-items: flex-start; /* Align content to the left when stacked */
+  /* Show Hamburger */
+  .hamburger { display: flex; }
+
+  /* CRITICAL FIX: 
+     Instead of max-height, we use Fixed Position and Visibility.
+     This guarantees the menu sits ON TOP of everything else.
+  */
+  .nav-links {
+    position: fixed; /* Fixed to viewport, not relative to parent */
+    top: 70px;       /* Directly below header */
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 3px solid #fce7f3;
+    box-shadow: 0 15px 20px rgba(0,0,0,0.1);
+    
+    /* Animation Logic */
+    transform: translateY(-150%); /* Move it up off-screen */
+    transition: transform 0.3s ease-in-out;
+    z-index: 1999; /* Just below header (2000) but above everything else */
+    opacity: 0;
+    pointer-events: none; /* Prevent clicking when hidden */
   }
 
-  .header .nav-links {
-    flex-direction: column; /* Stacks navigation links vertically */
-    gap: 10px; /* Reduced space between stacked links */
-    align-items: flex-start; /* Align links to the left */
-    width: 100%; /* Makes nav-links take full width */
+  /* When Active Class is added by React */
+  .nav-links.active {
+    transform: translateY(0); /* Slide down */
+    opacity: 1;
+    pointer-events: all;
   }
 
-  .header .nav-links a {
-    font-size: 0.95rem; /* Slightly smaller font size for tablet links */
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f7f7f7;
+    font-size: 1.1rem;
+    display: block; /* Ensure links take full width */
   }
 
-  .header .get-started {
-    margin-top: 5px; /* Reduced margin */
-    width: 100%; /* Make button container full width */
-  }
-
-  .header .get-started .btn-primary {
-    width: 100%; /* Button takes full width of its container */
-    padding: 12px 0; /* Adjust vertical padding, horizontal is handled by width */
-    font-size: 1rem;
-  }
-
-  .header .logo {
-    font-size: 1.6rem; /* Slightly smaller logo */
+  /* Dark Overlay when menu opens */
+  .menu-overlay {
+    display: block;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
   }
 }
 
-/* ========================================= */
-/* --- Responsive for Mobile Phones (480px and below) --- */
-/* ========================================= */
 @media (max-width: 480px) {
-  .header {
-    padding: 10px 15px; /* Even less padding on very small screens */
-    gap: 10px; /* Reduced gap */
-  }
-
-  .header .logo {
-    font-size: 1.5rem; /* Smaller logo for mobile */
-  }
-
-  .header .header-right {
-    gap: 15px; /* Reduced gap */
-  }
-
-  .header .nav-links {
-    gap: 8px; /* Even less space between navigation links */
-  }
-
-  .header .nav-links a {
-    font-size: 0.9rem; /* Smaller font size for mobile links */
-  }
-
-  .header .get-started .btn-primary {
-    padding: 10px 0; /* Slightly smaller vertical padding */
-    font-size: 0.95rem; /* Smaller font for button */
-  }
+  .header { padding: 0 15px; }
+  .logo { font-size: 1.4rem; }
+  .btn-primary, .btn-logout { padding: 8px 16px; font-size: 0.85rem; }
 }

@@ -6,24 +6,11 @@ import "./style/Header.css";
 const getAuthToken = () => localStorage.getItem('token');
 const clearAuthToken = () => { localStorage.removeItem('token'); };
 
-const HeaderStyles = () => (
-  <style>{`
-      .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background-color: white; font-family: 'Arial', sans-serif; position: fixed; top: 0; left: 0; width: 100%; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); box-sizing: border-box; }
-      .header .logo { font-size: 1.8rem; font-weight: bold; cursor: pointer; color: #333; text-decoration: none; }
-      .header .header-right { display: flex; align-items: center; gap: 30px; }
-      .nav-links { display: flex; gap: 20px; align-items: center; }
-      .nav-links a { color: #555; text-decoration: none; font-size: 1rem; font-weight: 500; transition: color 0.2s; }
-      .nav-links a:hover { color: #b8369a; }
-      .nav-item-active { color: #b8369a !important; font-weight: 700 !important; }
-      .btn-primary { background-color: #7C4DFF; color: white; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; }
-      .btn-logout { background-color: #ffe3e3; color: #dc3545; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    `}</style>
-);
-
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -34,39 +21,61 @@ const Header = () => {
     clearAuthToken();
     setIsLoggedIn(false);
     navigate("/");
+    setMenuOpen(false);
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <>
-      <HeaderStyles />
-      <header className="header">
-        <Link to="/" className="logo">SheSecure</Link>
-        <div className="header-right">
-          <nav className="nav-links">
-            {isLoggedIn ? (
-                <>
-                    <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'nav-item-active' : ''}>Dashboard</Link>
-                    {/* NEW LINKS */}
-                    <Link to="/community-map" className={location.pathname === '/community-map' ? 'nav-item-active' : ''}>Community Map</Link>
-                    <Link to="/contacts" className={location.pathname === '/contacts' ? 'nav-item-active' : ''}>Contacts</Link>
-                </>
-            ) : (
-                <>
-                    <a href="/#features">Features</a>
-                    <a href="/#howitworks">How It Works</a>
-                </>
-            )}
-          </nav>
-          <div className="get-started">
+    <header className="header">
+      {/* LEFT: Logo */}
+      <Link to="/" className="logo" onClick={closeMenu}>SheSecure</Link>
+
+      <div className="header-right">
+        
+        {/* NAVIGATION LINKS - The Dynamic Menu */}
+        <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
+          {isLoggedIn ? (
+            <>
+              <Link to="/dashboard" onClick={closeMenu} className={location.pathname === '/dashboard' ? 'nav-item-active' : ''}>Dashboard</Link>
+              <Link to="/community-map" onClick={closeMenu} className={location.pathname === '/community-map' ? 'nav-item-active' : ''}>Community Map</Link>
+              <Link to="/contacts" onClick={closeMenu} className={location.pathname === '/contacts' ? 'nav-item-active' : ''}>Contacts</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/#Challenges" onClick={closeMenu}>Challenges</Link>
+              <Link to="/#Solution" onClick={closeMenu}>Solution</Link>
+              <Link to="/#howitworks" onClick={closeMenu}>How It Works</Link>
+            </>
+          )}
+        </nav>
+
+        {/* ACTION GROUP: Hamburger + Button */}
+        <div className="action-group">
+          
+          {/* HAMBURGER ICON */}
+          <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+            <span className={menuOpen ? "bar open" : "bar"}></span>
+            <span className={menuOpen ? "bar open" : "bar"}></span>
+            <span className={menuOpen ? "bar open" : "bar"}></span>
+          </div>
+
+          {/* ACTION BUTTON */}
+          <div className="auth-button-container">
             {isLoggedIn ? (
               <button className="btn-logout" onClick={handleLogout}>Logout</button>
             ) : (
-              <Link className="btn-primary" to="/signup">Get Started</Link>
+              <Link className="btn-primary" to="/signup" onClick={closeMenu}>Get Started</Link>
             )}
           </div>
+
         </div>
-      </header>
-    </>
+      </div>
+      
+      {/* Background Overlay to click-away */}
+      {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
+    </header>
   );
 };
+
 export default Header;

@@ -8,24 +8,15 @@ const LoginStyles = () => (
       /* --- Authentication Page Styles --- */
       .auth-container {
         display: flex;
-        
-        /* --- CHANGED: Align items to the start (Left) --- */
         justify-content: flex-start;
-        
         align-items: flex-start;
         padding: 2rem 1rem;
-        
-        /* --- BACKGROUND IMAGE UPDATE START --- */
-        /* Ensure the container takes full screen height so the image covers everything */
         min-height: 100vh;
         width: 100%;
-        
-        /* Accessing image from public folder */
         background-image: url('/shesecure.png');
-        background-size: cover;    /* Scales image to fill screen */
+        background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        /* --- BACKGROUND IMAGE UPDATE END --- */
       }
 
       .auth-form-wrapper {
@@ -37,8 +28,6 @@ const LoginStyles = () => (
         max-width: 350px;
         text-align: center;
         margin-top: 60px;
-        
-        /* --- CHANGED: Spacing from the left side --- */
         margin-left: 12%;
       }
 
@@ -116,6 +105,46 @@ const LoginStyles = () => (
         font-weight: 600;
         text-decoration: none;
       }
+
+      /* ===========================
+         📱 Mobile View
+      ============================ */
+      @media (max-width: 600px) {
+        .auth-container {
+          justify-content: center;
+          align-items: center;
+          padding: 1rem;
+        }
+
+        .auth-form-wrapper {
+          width: 100%;
+          max-width: 100%;
+          margin-left: 0;
+          margin-top: 0;
+          padding: 1.5rem;
+          border-radius: 16px;
+        }
+
+        .auth-form-wrapper h2 {
+          font-size: 1.6rem;
+        }
+      }
+
+      /* ===========================
+         📱 Tablet View
+      ============================ */
+      @media (min-width: 601px) and (max-width: 1024px) {
+        .auth-container {
+          justify-content: center;
+          align-items: center;
+        }
+
+        .auth-form-wrapper {
+          width: 70%;
+          margin-left: 0;
+          margin-top: 0;
+        }
+      }
     `}
   </style>
 );
@@ -147,12 +176,11 @@ const Login = () => {
         throw new Error(data.msg || "Invalid credentials");
       }
 
-      // ✅ Save token properly
       saveAuthToken(data.token);
 
       alert("Login successful!");
       navigate("/dashboard");
-      window.location.reload(); // instantly update header button
+      window.location.reload();
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
     }
@@ -180,6 +208,7 @@ const Login = () => {
                 required
               />
             </div>
+
             <div className="input-group">
               <label htmlFor="password">Password</label>
               <input
@@ -191,6 +220,7 @@ const Login = () => {
                 required
               />
             </div>
+
             <button type="submit" className="auth-button">
               Log In
             </button>

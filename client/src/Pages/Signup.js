@@ -3,24 +3,17 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
 // --- Styles (Embedded for simplicity) ---
-
-
 const SignupStyles = () => (
     <style>
         {`
           /* --- Authentication Page Styles --- */
           .auth-container {
             display: flex;
-            
-            /* --- CHANGED: Align items to the start (Left) instead of right --- */
             justify-content: flex-start; 
-            
             align-items: flex-start;  
             padding: 2rem 1rem;       
             min-height: 100vh;        
             width: 100%;
-            
-            /* Background Image configuration */
             background-image: url('/shesecure.png'); 
             background-size: cover;    
             background-position: center; 
@@ -36,22 +29,123 @@ const SignupStyles = () => (
             max-width: 380px;
             text-align: center;
             margin-top: 60px;  
-            
-            /* --- CHANGED: Spacing from the left side now --- */
             margin-left: 12%; 
           }
 
-          .auth-form-wrapper h2 { font-size: 2rem; color: #333; margin-bottom: 0.5rem; font-weight: 700; }
-          .auth-subtext { color: #666; margin-bottom: 2rem; }
-          .error-message { color: #e74c3c; background-color: #fbecec; border: 1px solid #e74c3c; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; text-align: left; }
-          .auth-form { display: flex; flex-direction: column; gap: 1.25rem; text-align: left; }
-          .input-group { display: flex; flex-direction: column; }
-          .input-group label { font-weight: 600; color: #444; margin-bottom: 0.5rem; }
-          .input-group input { padding: 0.6rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
-          .input-group input:focus { outline: none; border-color: #b8369a; box-shadow: 0 0 0 3px rgba(184, 54, 154, 0.15); }
-          .auth-button { background: linear-gradient(90deg, #b8369a, #d54ca0); color: white; border: none; padding: 0.6rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; }
-          .auth-switch { margin-top: 1.5rem; color: #555; }
-          .auth-switch a { color: #b8369a; font-weight: 600; text-decoration: none; }
+          .auth-form-wrapper h2 { 
+            font-size: 2rem; 
+            color: #333; 
+            margin-bottom: 0.5rem; 
+            font-weight: 700; 
+          }
+
+          .auth-subtext { 
+            color: #666; 
+            margin-bottom: 2rem; 
+          }
+
+          .error-message { 
+            color: #e74c3c; 
+            background-color: #fbecec; 
+            border: 1px solid #e74c3c; 
+            padding: 0.75rem; 
+            border-radius: 8px; 
+            margin-bottom: 1rem; 
+            text-align: left; 
+          }
+
+          .auth-form { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1.25rem; 
+            text-align: left; 
+          }
+
+          .input-group { 
+            display: flex; 
+            flex-direction: column; 
+          }
+
+          .input-group label { 
+            font-weight: 600; 
+            color: #444; 
+            margin-bottom: 0.5rem; 
+          }
+
+          .input-group input { 
+            padding: 0.6rem 1rem; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+          }
+
+          .input-group input:focus { 
+            outline: none; 
+            border-color: #b8369a; 
+            box-shadow: 0 0 0 3px rgba(184, 54, 154, 0.15); 
+          }
+
+          .auth-button { 
+            background: linear-gradient(90deg, #b8369a, #d54ca0); 
+            color: white; 
+            border: none; 
+            padding: 0.6rem; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 1rem; 
+          }
+
+          .auth-switch { 
+            margin-top: 1.5rem; 
+            color: #555; 
+          }
+
+          .auth-switch a { 
+            color: #b8369a; 
+            font-weight: 600; 
+            text-decoration: none; 
+          }
+
+          /* ===========================
+             📱 Mobile View
+          ============================ */
+          @media (max-width: 600px) {
+            .auth-container {
+              justify-content: center;
+              align-items: center;
+              padding: 1rem;
+            }
+
+            .auth-form-wrapper {
+              width: 100%;
+              max-width: 100%;
+              margin-left: 0;
+              margin-top: 0;
+              padding: 1.5rem;
+              border-radius: 16px;
+            }
+
+            .auth-form-wrapper h2 {
+              font-size: 1.6rem;
+            }
+          }
+
+          /* ===========================
+             📱 Tablet View
+          ============================ */
+          @media (min-width: 601px) and (max-width: 1024px) {
+            .auth-container {
+              justify-content: center;
+              align-items: center;
+            }
+
+            .auth-form-wrapper {
+              width: 70%;
+              margin-left: 0;
+              margin-top: 0;
+            }
+          }
         `}
     </style>
 );
@@ -114,6 +208,7 @@ const Signup = () => {
                                 required
                             />
                         </div>
+
                         <div className="input-group">
                             <label htmlFor="email">Email Address</label>
                             <input
@@ -125,6 +220,7 @@ const Signup = () => {
                                 required
                             />
                         </div>
+
                         <div className="input-group">
                             <label htmlFor="password">Password</label>
                             <input
