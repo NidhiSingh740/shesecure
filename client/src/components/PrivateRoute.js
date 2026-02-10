@@ -3,12 +3,17 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
+import { useAuth } from '../context/AuthContext';
+
 const PrivateRoute = ({ children }) => {
-  // Check for the authentication token in local storage.
-  const isAuthenticated = localStorage.getItem('token');
+  const { isLoggedIn, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>; // Or return null, or a spinner
+  }
 
   // If the token exists, the user is logged in. Allow them to see the page.
-  if (isAuthenticated) {
+  if (isLoggedIn) {
     return children;
   }
 
