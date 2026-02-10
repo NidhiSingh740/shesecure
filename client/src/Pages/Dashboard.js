@@ -4,7 +4,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 
 // --- CONFIG ---
-const API_URL = 'http://172.18.24.167:5000'; // Ensure this matches your IP
+const API_URL = 'http://172.18.24.103:5000'; // Ensure this matches your IP
 
 // --- UTILS: GEOMETRY ---
 const getDistance = (lat1, lon1, lat2, lon2) => {

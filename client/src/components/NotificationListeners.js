@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://172.18.24.167:5000'; // Your IP
+const API_URL = 'http://172.18.24.103:5000'; // Your IP
 
 const NotificationStyles = () => (
   <style>{`
