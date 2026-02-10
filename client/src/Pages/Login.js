@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { saveAuthToken } from "../utils/auth"; // ✅ imported
+import { useAuth } from "../context/AuthContext";
 
 const LoginStyles = () => (
   <style>
@@ -155,6 +155,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const { login } = useAuth();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -176,11 +178,10 @@ const Login = () => {
         throw new Error(data.msg || "Invalid credentials");
       }
 
-      saveAuthToken(data.token);
+      login(data.token);
 
       alert("Login successful!");
       navigate("/dashboard");
-      window.location.reload();
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
     }

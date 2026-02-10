@@ -2,19 +2,19 @@
 // src/Pages/Logout.js
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthToken } from "../utils/auth";
+import { useAuth } from "../context/AuthContext";
 
 const Logout = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
-    clearAuthToken();
+    logout();
     navigate("/");
-    window.location.reload();
-  }, [navigate]);
+  }, [navigate, logout]);
 
   return (
-    <div style={{ textAlign: "center",  padding: "5rem" }}>
+    <div style={{ textAlign: "center", padding: "5rem" }}>
       <h2>Logging out...</h2>
     </div>
   );

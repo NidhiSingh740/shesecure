@@ -3,23 +3,18 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import "./style/Header.css";
 
 // --- AUTH HELPERS ---
-const getAuthToken = () => localStorage.getItem('token');
-const clearAuthToken = () => { localStorage.removeItem('token'); };
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const token = getAuthToken();
-    setIsLoggedIn(!!token);
-  }, [location]);
+  // Removed useEffect for auth check since context handles it
 
   const handleLogout = () => {
-    clearAuthToken();
-    setIsLoggedIn(false);
+    logout();
     navigate("/");
     setMenuOpen(false);
   };
@@ -32,7 +27,7 @@ const Header = () => {
       <Link to="/" className="logo" onClick={closeMenu}>SheSecure</Link>
 
       <div className="header-right">
-        
+
         {/* NAVIGATION LINKS - The Dynamic Menu */}
         <nav className={`nav-links ${menuOpen ? "active" : ""}`}>
           {isLoggedIn ? (
@@ -52,7 +47,7 @@ const Header = () => {
 
         {/* ACTION GROUP: Hamburger + Button */}
         <div className="action-group">
-          
+
           {/* HAMBURGER ICON */}
           <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
             <span className={menuOpen ? "bar open" : "bar"}></span>
@@ -71,7 +66,7 @@ const Header = () => {
 
         </div>
       </div>
-      
+
       {/* Background Overlay to click-away */}
       {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
     </header>
