@@ -26,7 +26,7 @@ const NotificationListener = () => {
     const socket = io(API_URL);
     socket.on('receiveNotification', (data) => {
       console.log("ALERT:", data);
-      try { new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(()=>{}); } catch(e){}
+      try { new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(() => { }); } catch (e) { }
       setAlertData(data);
     });
     return () => socket.disconnect();
@@ -38,10 +38,10 @@ const NotificationListener = () => {
     <>
       <NotificationStyles />
       <div className="notification-popup">
-        <div style={{color: '#ef4444', fontWeight: 'bold', marginBottom: '5px'}}>⚠️ SAFETY ALERT</div>
+        <div style={{ color: '#ef4444', fontWeight: 'bold', marginBottom: '5px' }}>⚠️ SAFETY ALERT</div>
         <div>{alertData.message}</div>
         <button className="notif-btn" onClick={() => { navigate(`/track/${alertData.tripId}`); setAlertData(null); }}>TRACK LIVE LOCATION</button>
-        <button onClick={() => setAlertData(null)} style={{background:'none', border:'none', width:'100%', marginTop:'5px', color:'#666', cursor:'pointer'}}>Dismiss</button>
+        <button onClick={() => setAlertData(null)} style={{ background: 'none', border: 'none', width: '100%', marginTop: '5px', color: '#666', cursor: 'pointer' }}>Dismiss</button>
       </div>
     </>
   );

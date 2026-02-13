@@ -8,22 +8,22 @@ const API_URL = 'http://172.18.24.103:5000'; // Ensure this matches your IP
 
 // --- UTILS: GEOMETRY ---
 const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; 
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+  const R = 6371e3;
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 };
 
 const getDistanceFromLine = (p, a, b) => {
-    const R = 6371e3;
-    const d13 = getDistance(a.lat, a.lng, p.lat, p.lng) / R;
-    const θ13 = Math.atan2(p.lng-a.lng, p.lat-a.lat);
-    const θ12 = Math.atan2(b.lon-a.lng, b.lat-a.lat);
-    return Math.asin(Math.sin(d13) * Math.sin(θ13-θ12)) * R;
+  const R = 6371e3;
+  const d13 = getDistance(a.lat, a.lng, p.lat, p.lng) / R;
+  const θ13 = Math.atan2(p.lng - a.lng, p.lat - a.lat);
+  const θ12 = Math.atan2(b.lon - a.lng, b.lat - a.lat);
+  return Math.asin(Math.sin(d13) * Math.sin(θ13 - θ12)) * R;
 };
 
 // --- STYLES ---
@@ -598,8 +598,8 @@ const DashboardStyles = () => (
 // --- LOAD LEAFLET ---
 const loadLeaflet = (cb) => {
   if (window.L) return cb();
-  const c = document.createElement('link'); c.rel='stylesheet'; c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
-  const s = document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload=cb; document.head.appendChild(s);
+  const c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
+  const s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload = cb; document.head.appendChild(s);
 };
 
 // --- MAP VIEW ---
@@ -614,50 +614,50 @@ const MapView = ({ userPosition, destination, zones, onMapClick, isZoneMode }) =
   useEffect(() => {
     loadLeaflet(() => {
       setTimeout(() => {
-          if (window.L && mapContainerRef.current && !mapInstanceRef.current) {
-            try {
-                const L = window.L;
-                delete L.Icon.Default.prototype._getIconUrl;
-                L.Icon.Default.mergeOptions({
-                    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                });
-                
-                const lat = parseFloat(userPosition?.lat) || 26.7606;
-                const lng = parseFloat(userPosition?.lng) || 83.3732;
-                
-                mapInstanceRef.current = L.map(mapContainerRef.current).setView([lat, lng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstanceRef.current);
-                userMarkerRef.current = L.marker([lat, lng]).addTo(mapInstanceRef.current);
-                mapInstanceRef.current.invalidateSize();
-            } catch (e) { console.error("Map Init Error", e); }
-          }
+        if (window.L && mapContainerRef.current && !mapInstanceRef.current) {
+          try {
+            const L = window.L;
+            delete L.Icon.Default.prototype._getIconUrl;
+            L.Icon.Default.mergeOptions({
+              iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+              iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+            });
+
+            const lat = parseFloat(userPosition?.lat) || 26.7606;
+            const lng = parseFloat(userPosition?.lng) || 83.3732;
+
+            mapInstanceRef.current = L.map(mapContainerRef.current).setView([lat, lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstanceRef.current);
+            userMarkerRef.current = L.marker([lat, lng]).addTo(mapInstanceRef.current);
+            mapInstanceRef.current.invalidateSize();
+          } catch (e) { console.error("Map Init Error", e); }
+        }
       }, 100);
     });
   }, []);
 
   // Click Handler
   useEffect(() => {
-      if (!mapInstanceRef.current) return;
-      mapInstanceRef.current.off('click');
-      mapInstanceRef.current.on('click', (e) => {
-          if (onMapClick) onMapClick(e.latlng);
-      });
+    if (!mapInstanceRef.current) return;
+    mapInstanceRef.current.off('click');
+    mapInstanceRef.current.on('click', (e) => {
+      if (onMapClick) onMapClick(e.latlng);
+    });
   }, [onMapClick]);
 
   // Render Zones (With Delete)
   useEffect(() => {
-      if(mapInstanceRef.current && window.L && zones) {
-          zoneLayersRef.current.forEach(layer => layer.remove());
-          zoneLayersRef.current = [];
-          zones.forEach(zone => {
-              const color = zone.type === 'Safe' ? 'green' : 'red';
-              const circle = window.L.circle([zone.location.lat, zone.location.lng], {
-                  color: color, fillColor: color, fillOpacity: 0.2, radius: zone.radius || 200
-              }).addTo(mapInstanceRef.current);
-              
-              const popupContent = `
+    if (mapInstanceRef.current && window.L && zones) {
+      zoneLayersRef.current.forEach(layer => layer.remove());
+      zoneLayersRef.current = [];
+      zones.forEach(zone => {
+        const color = zone.type === 'Safe' ? 'green' : 'red';
+        const circle = window.L.circle([zone.location.lat, zone.location.lng], {
+          color: color, fillColor: color, fillOpacity: 0.2, radius: zone.radius || 200
+        }).addTo(mapInstanceRef.current);
+
+        const popupContent = `
                   <div style="text-align:center">
                       <b>${zone.name}</b><br/>${zone.type} Zone<br/>
                       <button onclick="window.handleDeleteZone('${zone._id}')" 
@@ -666,10 +666,10 @@ const MapView = ({ userPosition, destination, zones, onMapClick, isZoneMode }) =
                       </button>
                   </div>
               `;
-              circle.bindPopup(popupContent);
-              zoneLayersRef.current.push(circle);
-          });
-      }
+        circle.bindPopup(popupContent);
+        zoneLayersRef.current.push(circle);
+      });
+    }
   }, [zones]);
 
   // Update Positions
@@ -680,8 +680,8 @@ const MapView = ({ userPosition, destination, zones, onMapClick, isZoneMode }) =
         const uLat = parseFloat(userPosition?.lat);
         const uLng = parseFloat(userPosition?.lng);
         if (!isNaN(uLat) && !isNaN(uLng) && userMarkerRef.current) {
-             userMarkerRef.current.setLatLng([uLat, uLng]);
-             if(!destination && !isZoneMode) mapInstanceRef.current.panTo([uLat, uLng]);
+          userMarkerRef.current.setLatLng([uLat, uLng]);
+          if (!destination && !isZoneMode) mapInstanceRef.current.panTo([uLat, uLng]);
         }
         if (destination && destination.lat && destination.lon) {
           const dLat = parseFloat(destination.lat);
@@ -691,7 +691,7 @@ const MapView = ({ userPosition, destination, zones, onMapClick, isZoneMode }) =
           const path = [[uLat, uLng], [dLat, dLng]];
           if (!polylineRef.current) polylineRef.current = L.polyline(path, { color: '#4f46e5', weight: 4 }).addTo(mapInstanceRef.current);
           else polylineRef.current.setLatLngs(path);
-          try { mapInstanceRef.current.fitBounds(path, { padding: [50, 50] }); } catch(e){}
+          try { mapInstanceRef.current.fitBounds(path, { padding: [50, 50] }); } catch (e) { }
         }
       } catch (e) { console.error("Map Update Error", e); }
     }
@@ -701,196 +701,196 @@ const MapView = ({ userPosition, destination, zones, onMapClick, isZoneMode }) =
 };
 
 const BeforeTripPanel = ({ contacts, loading, searchTerm, setSearchTerm, onSearch, results, onSelectDest, dest, onStart, searchError, setSafeCheckInterval, setSafeCheckUnit, safeCheckUnit, safetyScore, toggleZoneMode, isZoneMode }) => (
-    <div className="panel-container">
-        <div className="dashboard-card trip-planning-module">
-          <div className="card-header"><h3>Start a New Trip</h3></div>
-          
-          {isZoneMode ? (
-              <div className="zone-mode-active">
-                  <p>📍 Click on the map to place a Safety Zone.</p>
-                  <button onClick={toggleZoneMode} style={{padding:'5px 15px', border:'1px solid #aaa', borderRadius:'4px', cursor:'pointer'}}>Cancel</button>
-              </div>
-          ) : (
-            <div className="destination-form">
-                <label>Where are you going?</label>
-                <div className="search-input-group">
-                  <input type="text" placeholder="Search destination..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                  <button onClick={onSearch}>Search</button>
-                </div>
-                {searchError && <p className="search-error">{searchError}</p>}
-                
-                {results.length > 0 && (
-                <div className="results-section">
-                    <ul className="results-list">
-                    {results.slice(0, 5).map((r) => (
-                        <li key={r.place_id} onClick={() => onSelectDest({lat: r.lat, lon: r.lon, display_name: r.display_name})} style={{background: dest?.place_id === r.place_id ? '#f3e5f5':''}}>
-                        {r.display_name}
-                        </li>
-                    ))}
-                    </ul>
-                </div>
-                )}
-                
-                {dest && safetyScore !== null && (
-                    <div className={`safety-card ${safetyScore >= 75 ? 'safety-score-high' : safetyScore >= 50 ? 'safety-score-med' : 'safety-score-low'}`}>
-                        <small className="score-label">Route Safety Score</small>
-                        <span className="score-value">{safetyScore}/100</span>
-                        <p style={{margin:0, fontSize:'0.9rem', fontWeight:600}}>
-                            {safetyScore >= 75 ? "Safe Route ✅" : safetyScore >= 50 ? "Risky Route ⚠️" : "Danger Route ⛔"}
-                        </p>
-                    </div>
-                )}
+  <div className="panel-container">
+    <div className="dashboard-card trip-planning-module">
+      <div className="card-header"><h3>Start a New Trip</h3></div>
 
-                {/* --- UNIT SELECTOR SECTION --- */}
-                <div style={{ margin: '15px 0' }}>
-                    <label>Safe Check Interval:</label>
-                    <div style={{display:'flex', gap:'10px'}}>
-                        <input
-                            type="number"
-                            placeholder="Enter time duration"
-                            onChange={(e) => setSafeCheckInterval(e.target.value)}
-                            style={{
-                                width: '70%',
-                                padding: '12px',
-                                borderRadius: '8px',
-                                border: '1px solid #ced4da',
-                                background: 'white',
-                                fontFamily: "'Poppins', sans-serif",
-                                fontSize: '0.95rem',
-                                outline: 'none'
-                            }}
-                        />
-                        <select 
-                            style={{width:'30%', padding:'12px', borderRadius:'8px', border:'1px solid #ced4da', background:'white', outline:'none', fontFamily:"'Poppins', sans-serif"}} 
-                            value={safeCheckUnit}
-                            onChange={(e) => setSafeCheckUnit(e.target.value)}
-                        >
-                            <option value="minutes">Mins</option>
-                            <option value="hours">Hours</option>
-                            <option value="days">Days</option>
-                        </select>
-                    </div>
-                </div>
+      {isZoneMode ? (
+        <div className="zone-mode-active">
+          <p>📍 Click on the map to place a Safety Zone.</p>
+          <button onClick={toggleZoneMode} style={{ padding: '5px 15px', border: '1px solid #aaa', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+        </div>
+      ) : (
+        <div className="destination-form">
+          <label>Where are you going?</label>
+          <div className="search-input-group">
+            <input type="text" placeholder="Search destination..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <button onClick={onSearch}>Search</button>
+          </div>
+          {searchError && <p className="search-error">{searchError}</p>}
 
-                <div className="zone-btn-row">
-                    <button className="start-trip-button" onClick={onStart} disabled={!dest}>Start SafeWalk Trip</button>
-                    <button className="start-trip-button" onClick={toggleZoneMode} style={{background:'linear-gradient(90deg, #b8369a, #6a11cb)', width:'35%'}}>+ Add Zone</button>
-                </div>
+          {results.length > 0 && (
+            <div className="results-section">
+              <ul className="results-list">
+                {results.slice(0, 5).map((r) => (
+                  <li key={r.place_id} onClick={() => onSelectDest({ lat: r.lat, lon: r.lon, display_name: r.display_name })} style={{ background: dest?.place_id === r.place_id ? '#f3e5f5' : '' }}>
+                    {r.display_name}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
+
+          {dest && safetyScore !== null && (
+            <div className={`safety-card ${safetyScore >= 75 ? 'safety-score-high' : safetyScore >= 50 ? 'safety-score-med' : 'safety-score-low'}`}>
+              <small className="score-label">Route Safety Score</small>
+              <span className="score-value">{safetyScore}/100</span>
+              <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>
+                {safetyScore >= 75 ? "Safe Route ✅" : safetyScore >= 50 ? "Risky Route ⚠️" : "Danger Route ⛔"}
+              </p>
+            </div>
+          )}
+
+          {/* --- UNIT SELECTOR SECTION --- */}
+          <div style={{ margin: '15px 0' }}>
+            <label>Safe Check Interval:</label>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input
+                type="number"
+                placeholder="Enter time duration"
+                onChange={(e) => setSafeCheckInterval(e.target.value)}
+                style={{
+                  width: '70%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #ced4da',
+                  background: 'white',
+                  fontFamily: "'Poppins', sans-serif",
+                  fontSize: '0.95rem',
+                  outline: 'none'
+                }}
+              />
+              <select
+                style={{ width: '30%', padding: '12px', borderRadius: '8px', border: '1px solid #ced4da', background: 'white', outline: 'none', fontFamily: "'Poppins', sans-serif" }}
+                value={safeCheckUnit}
+                onChange={(e) => setSafeCheckUnit(e.target.value)}
+              >
+                <option value="minutes">Mins</option>
+                <option value="hours">Hours</option>
+                <option value="days">Days</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="zone-btn-row">
+            <button className="start-trip-button" onClick={onStart} disabled={!dest}>Start SafeWalk Trip</button>
+            <button className="start-trip-button" onClick={toggleZoneMode} style={{ background: 'linear-gradient(90deg, #b8369a, #6a11cb)', width: '35%' }}>+ Add Zone</button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="dashboard-card contacts-module" style={{ flexGrow: 1, overflowY: 'auto' }}>
+      <div className="card-header">
+        <h3>Trusted Contacts</h3>
+        <Link to="/contacts" className="manage-link">Manage</Link>
+      </div>
+      <div className="contact-list">
+        {loading && <p>Loading contacts...</p>}
+        {contacts.map(c => (
+          <div key={c._id} className="contact-item">
+            <div className="contact-avatar">{c.name.charAt(0)}</div>
+            <div className="contact-details"><strong>{c.name}</strong><span>{c.phone}</span></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onSOS, safeCheckSeconds, handleImSafe, zoneAlert, routeDeviationAlert, isVoiceListening, toggleVoiceMode }) => {
+  const [time, setTime] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    if (!tripDetails?.startedAt) return;
+    const start = new Date(tripDetails.startedAt);
+    const i = setInterval(() => setTime(Math.floor((new Date() - start) / 1000)), 1000);
+    return () => clearInterval(i);
+  }, [tripDetails]);
+
+  const formatElapsedTime = (s) => new Date(s * 1000).toISOString().substr(11, 8);
+
+  const formatCountdown = (seconds) => {
+    if (isNaN(seconds) || seconds === null || seconds < 0) return "00:00";
+    const d = Math.floor(seconds / (3600 * 24));
+    const h = Math.floor((seconds % (3600 * 24)) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+
+    if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handleWhatsAppShare = (contact) => {
+    const link = `${window.location.origin}/track/${tripDetails._id}`;
+    const msg = `🚨 I started a SafeWalk trip! \n\nTrack my live location here:\n${link}`;
+    const phone = contact.phone.replace(/[^0-9]/g, '');
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  };
+
+  return (
+    <div className="panel-container">
+      <div className="dashboard-card">
+        <h3 className="status-title">Trip in Progress</h3>
+
+        {zoneAlert && (
+          <div className="route-alert" style={{ background: zoneAlert.type === 'Safe' ? '#d1fae5' : '#fee2e2', color: zoneAlert.type === 'Safe' ? '#065f46' : '#991b1b' }}>
+            {zoneAlert.msg}
+          </div>
+        )}
+        {routeDeviationAlert && <div className="route-alert">⚠️ Route Deviation Detected! You are off-track.</div>}
+
+        {safeCheckSeconds !== null && (
+          <div className="safe-check-box">
+            <small style={{ fontWeight: 'bold', color: '#856404' }}>SAFE CHECK IN</small>
+            <span className="safe-timer" style={{ color: safeCheckSeconds < 30 ? '#dc3545' : '#856404' }}>
+              {formatCountdown(safeCheckSeconds)}
+            </span>
+            <button className="btn-im-safe" onClick={handleImSafe}>I'm Safe</button>
+          </div>
+        )}
+
+        <div className="timer-display"><p>ELAPSED TIME</p><span>{formatElapsedTime(time)}</span></div>
+
+        <div className="trip-actions">
+          <button className="share-button" onClick={() => setShowModal(true)}>Share Link</button>
+          <button className="end-trip-button" onClick={onEndTrip}>End Trip</button>
         </div>
 
-        <div className="dashboard-card contacts-module" style={{flexGrow:1, overflowY:'auto'}}>
-          <div className="card-header">
-            <h3>Trusted Contacts</h3>
-            <Link to="/contacts" className="manage-link">Manage</Link>
-          </div>
-          <div className="contact-list">
-            {loading && <p>Loading contacts...</p>}
-            {contacts.map(c => (
-              <div key={c._id} className="contact-item">
-                <div className="contact-avatar">{c.name.charAt(0)}</div>
-                <div className="contact-details"><strong>{c.name}</strong><span>{c.phone}</span></div>
+        <div className="secondary-icon-row">
+          <button className="sos-btn-floating" onClick={onSOS}>SOS</button>
+
+          {isVoiceListening !== undefined && (
+            <button className={`mic-btn-floating ${isVoiceListening ? 'mic-active' : ''}`} onClick={toggleVoiceMode}>
+              {isVoiceListening ? '🎙️' : '🔇'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Share with...</h3>
+              <button onClick={() => setShowModal(false)} style={{ border: 'none', background: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#adb5bd' }}>×</button>
+            </div>
+            {contacts.length === 0 ? <p>No contacts found.</p> : contacts.map(c => (
+              <div key={c._id} className="share-item">
+                <div><strong>{c.name}</strong><br /><small style={{ color: '#888' }}>{c.phone}</small></div>
+                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>
+                  Share on WhatsApp
+                </button>
               </div>
             ))}
           </div>
         </div>
+      )}
     </div>
-);
-
-const TripStatusPanel = ({ tripDetails, onEndTrip, contacts, onSOS, safeCheckSeconds, handleImSafe, zoneAlert, routeDeviationAlert, isVoiceListening, toggleVoiceMode }) => {
-    const [time, setTime] = useState(0);
-    const [showModal, setShowModal] = useState(false);
-
-    useEffect(() => {
-        if(!tripDetails?.startedAt) return;
-        const start = new Date(tripDetails.startedAt);
-        const i = setInterval(() => setTime(Math.floor((new Date() - start) / 1000)), 1000);
-        return () => clearInterval(i);
-    }, [tripDetails]);
-
-    const formatElapsedTime = (s) => new Date(s * 1000).toISOString().substr(11, 8);
-
-    const formatCountdown = (seconds) => {
-        if (isNaN(seconds) || seconds === null || seconds < 0) return "00:00";
-        const d = Math.floor(seconds / (3600 * 24));
-        const h = Math.floor((seconds % (3600 * 24)) / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = Math.floor(seconds % 60);
-
-        if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
-        if (h > 0) return `${h}h ${m}m ${s}s`;
-        return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    };
-
-    const handleWhatsAppShare = (contact) => {
-        const link = `${window.location.origin}/track/${tripDetails._id}`;
-        const msg = `🚨 I started a SafeWalk trip! \n\nTrack my live location here:\n${link}`;
-        const phone = contact.phone.replace(/[^0-9]/g, ''); 
-        const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
-        window.open(url, '_blank');
-    };
-
-    return (
-        <div className="panel-container">
-            <div className="dashboard-card">
-                <h3 className="status-title">Trip in Progress</h3>
-                
-                {zoneAlert && (
-                    <div className="route-alert" style={{background: zoneAlert.type === 'Safe' ? '#d1fae5' : '#fee2e2', color: zoneAlert.type === 'Safe' ? '#065f46' : '#991b1b'}}>
-                         {zoneAlert.msg}
-                    </div>
-                )}
-                {routeDeviationAlert && <div className="route-alert">⚠️ Route Deviation Detected! You are off-track.</div>}
-
-                {safeCheckSeconds !== null && (
-                    <div className="safe-check-box">
-                        <small style={{fontWeight:'bold', color:'#856404'}}>SAFE CHECK IN</small>
-                        <span className="safe-timer" style={{color: safeCheckSeconds < 30 ? '#dc3545' : '#856404'}}>
-                            {formatCountdown(safeCheckSeconds)}
-                        </span>
-                        <button className="btn-im-safe" onClick={handleImSafe}>I'm Safe</button>
-                    </div>
-                )}
-
-                <div className="timer-display"><p>ELAPSED TIME</p><span>{formatElapsedTime(time)}</span></div>
-                
-                <div className="trip-actions">
-                    <button className="share-button" onClick={() => setShowModal(true)}>Share Link</button>
-                    <button className="end-trip-button" onClick={onEndTrip}>End Trip</button>
-                </div>
-
-                <div className="secondary-icon-row">
-                    <button className="sos-btn-floating" onClick={onSOS}>SOS</button>
-                    
-                    {isVoiceListening !== undefined && (
-                    <button className={`mic-btn-floating ${isVoiceListening ? 'mic-active' : ''}`} onClick={toggleVoiceMode}>
-                        {isVoiceListening ? '🎙️' : '🔇'}
-                    </button>
-                    )}
-                </div>
-            </div>
-
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h3>Share with...</h3>
-                            <button onClick={() => setShowModal(false)} style={{border:'none', background:'none', fontSize:'1.5rem', cursor:'pointer', color:'#adb5bd'}}>×</button>
-                        </div>
-                        {contacts.length === 0 ? <p>No contacts found.</p> : contacts.map(c => (
-                            <div key={c._id} className="share-item">
-                                <div><strong>{c.name}</strong><br/><small style={{color:'#888'}}>{c.phone}</small></div>
-                                <button className="wa-btn" onClick={() => handleWhatsAppShare(c)}>
-                                    Share on WhatsApp
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+  );
 };
 
 const Dashboard = () => {
@@ -903,7 +903,7 @@ const Dashboard = () => {
   const [tripDetails, setTripDetails] = useState(null);
   const [userPos, setUserPos] = useState({ lat: 26.7606, lng: 83.3732 });
   const [searchError, setSearchError] = useState('');
-  
+
   // FIX: Unit Selection State
   const [safeCheckInterval, setSafeCheckInterval] = useState('');
   const [safeCheckUnit, setSafeCheckUnit] = useState('minutes');
@@ -911,14 +911,14 @@ const Dashboard = () => {
   const [sosCountdown, setSosCountdown] = useState(null);
   const [safetyScore, setSafetyScore] = useState(null);
 
-  const [zones, setZones] = useState([]); 
+  const [zones, setZones] = useState([]);
   const [isZoneMode, setIsZoneMode] = useState(false);
   const [showZoneModal, setShowZoneModal] = useState(false);
   const [newZoneCoords, setNewZoneCoords] = useState(null);
-  const [activeZoneAlert, setActiveZoneAlert] = useState(null); 
+  const [activeZoneAlert, setActiveZoneAlert] = useState(null);
   const [routeDeviationAlert, setRouteDeviationAlert] = useState(false);
-  const [insideZones, setInsideZones] = useState(new Set()); 
-  const [isVoiceListening, setIsVoiceListening] = useState(false); 
+  const [insideZones, setInsideZones] = useState(new Set());
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
 
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
@@ -927,14 +927,14 @@ const Dashboard = () => {
 
   // 1. DELETE FUNCTION
   useEffect(() => {
-      window.handleDeleteZone = async (id) => {
-          if(!window.confirm("Delete this zone?")) return;
-          try {
-              const token = localStorage.getItem('token');
-              await axios.delete(`${API_URL}/api/zones/${id}`, { headers: { 'x-auth-token': token } });
-              setZones(prev => prev.filter(z => z._id !== id));
-          } catch(e) { alert("Failed to delete zone"); }
-      };
+    window.handleDeleteZone = async (id) => {
+      if (!window.confirm("Delete this zone?")) return;
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`${API_URL}/api/zones/${id}`, { headers: { 'x-auth-token': token } });
+        setZones(prev => prev.filter(z => z._id !== id));
+      } catch (e) { alert("Failed to delete zone"); }
+    };
   }, []);
 
   // 2. LOAD DATA
@@ -945,222 +945,225 @@ const Dashboard = () => {
       (e) => console.error(e), { enableHighAccuracy: true }
     );
     const token = localStorage.getItem('token');
-    if(!token) { navigate('/login'); return; }
+    if (!token) { navigate('/login'); return; }
     axios.get(`${API_URL}/api/contacts`, { headers: { 'x-auth-token': token } }).then(res => setContacts(res.data));
     axios.get(`${API_URL}/api/zones`, { headers: { 'x-auth-token': token } }).then(res => setZones(res.data)).finally(() => setLoading(false));
 
-    return () => { if(socketRef.current) socketRef.current.disconnect(); if(watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current); };
+    return () => { if (socketRef.current) socketRef.current.disconnect(); if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current); };
   }, [navigate]);
 
   // 3. VOICE SOS LOGIC
   useEffect(() => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-          recognitionRef.current = new SpeechRecognition();
-          recognitionRef.current.continuous = true;
-          recognitionRef.current.interimResults = true;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
 
-          recognitionRef.current.onresult = (event) => {
-              for (let i = event.resultIndex; i < event.results.length; ++i) {
-                  if (event.results[i].isFinal) {
-                      const transcript = event.results[i][0].transcript.toLowerCase();
-                      if (transcript.includes('help') || transcript.includes('emergency')) {
-                          triggerSOSSequence();
-                      }
-                  }
-              }
-          };
-          recognitionRef.current.onend = () => { if (isVoiceListening) recognitionRef.current.start(); };
-      }
+      recognitionRef.current.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const transcript = event.results[i][0].transcript.toLowerCase();
+            if (transcript.includes('help') || transcript.includes('emergency')) {
+              triggerSOSSequence();
+            }
+          }
+        }
+      };
+      recognitionRef.current.onend = () => { if (isVoiceListening) recognitionRef.current.start(); };
+    }
   }, [isVoiceListening]);
 
   const toggleVoiceMode = () => {
-      if (!recognitionRef.current) return alert("Browser does not support Speech");
-      if (isVoiceListening) { recognitionRef.current.stop(); setIsVoiceListening(false); }
-      else { recognitionRef.current.start(); setIsVoiceListening(true); }
+    if (!recognitionRef.current) return alert("Browser does not support Speech");
+    if (isVoiceListening) { recognitionRef.current.stop(); setIsVoiceListening(false); }
+    else { recognitionRef.current.start(); setIsVoiceListening(true); }
   };
 
   // 4. GEOFENCING & NOTIFICATIONS
   useEffect(() => {
-      if (!userPos) return;
-      const currentInside = new Set(insideZones);
-      zones.forEach(zone => {
-          const dist = getDistance(userPos.lat, userPos.lng, zone.location.lat, zone.location.lng);
-          const isInside = dist <= zone.radius;
+    if (!userPos) return;
+    let changed = false;
+    const currentInside = new Set(insideZones);
+    zones.forEach(zone => {
+      const dist = getDistance(userPos.lat, userPos.lng, zone.location.lat, zone.location.lng);
+      const isInside = dist <= zone.radius;
 
-          if (isInside && !currentInside.has(zone._id)) {
-              currentInside.add(zone._id);
-              const msg = zone.type === 'Safe' ? `Arrived at ${zone.name}` : `⚠️ Entering ${zone.name}`;
-              setActiveZoneAlert({ type: zone.type, msg });
-              setTimeout(() => setActiveZoneAlert(null), 5000);
-              if (isActive && tripDetails && socketRef.current) {
-                  socketRef.current.emit('zoneAlert', { tripId: tripDetails._id, message: msg, type: zone.type });
-              }
-          } else if (!isInside && currentInside.has(zone._id)) {
-              currentInside.delete(zone._id);
-              if (zone.type === 'Safe') {
-                  const msg = `Leaving ${zone.name}`;
-                  setActiveZoneAlert({ type: 'Danger', msg });
-                  setTimeout(() => setActiveZoneAlert(null), 5000);
-                  if (isActive && tripDetails && socketRef.current) {
-                      socketRef.current.emit('zoneAlert', { tripId: tripDetails._id, message: msg, type: 'Danger' });
-                  }
-              }
+      if (isInside && !currentInside.has(zone._id)) {
+        currentInside.add(zone._id);
+        changed = true;
+        const msg = zone.type === 'Safe' ? `Arrived at ${zone.name}` : `⚠️ Entering ${zone.name}`;
+        setActiveZoneAlert({ type: zone.type, msg });
+        setTimeout(() => setActiveZoneAlert(null), 5000);
+        if (isActive && tripDetails && socketRef.current) {
+          socketRef.current.emit('zoneAlert', { tripId: tripDetails._id, message: msg, type: zone.type });
+        }
+      } else if (!isInside && currentInside.has(zone._id)) {
+        currentInside.delete(zone._id);
+        changed = true;
+        if (zone.type === 'Safe') {
+          const msg = `Leaving ${zone.name}`;
+          setActiveZoneAlert({ type: 'Danger', msg });
+          setTimeout(() => setActiveZoneAlert(null), 5000);
+          if (isActive && tripDetails && socketRef.current) {
+            socketRef.current.emit('zoneAlert', { tripId: tripDetails._id, message: msg, type: 'Danger' });
           }
-      });
-      setInsideZones(currentInside);
-      if (isActive && tripDetails && destination && tripDetails.startLocation) {
-          const dev = getDistanceFromLine(userPos, tripDetails.startLocation, {lat: parseFloat(destination.lat), lng: parseFloat(destination.lon)});
-          setRouteDeviationAlert(Math.abs(dev) > 500);
+        }
       }
+    });
+    if (changed) setInsideZones(currentInside);
+    if (isActive && tripDetails && destination && tripDetails.startLocation) {
+      const dev = getDistanceFromLine(userPos, tripDetails.startLocation, { lat: parseFloat(destination.lat), lng: parseFloat(destination.lon) });
+      setRouteDeviationAlert(Math.abs(dev) > 500);
+    }
   }, [userPos, zones, isActive, tripDetails, destination, insideZones]);
 
   // HANDLERS
-  const handleSearch = async () => { try { const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`); setResults(res.data); } catch(e){} };
-  
+  const handleSearch = async () => { try { const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${searchTerm}`); setResults(res.data); } catch (e) { } };
+
   // FIX 2: Updated Safety Score Logic
   const calculateSafetyScore = async (destLat, destLon) => {
-      try {
-          const res = await axios.get(`${API_URL}/api/incidents`);
-          const incidents = res.data;
-          
-          if (!incidents || incidents.length === 0) {
-              setSafetyScore(100); 
-              return;
+    try {
+      const res = await axios.get(`${API_URL}/api/incidents`);
+      const incidents = res.data;
+
+      if (!incidents || incidents.length === 0) {
+        setSafetyScore(100);
+        return;
+      }
+
+      let nearbyCount = 0;
+      let seriousIncidentFound = false;
+      let riskyIncidentFound = false;
+
+      const R = 6371;
+      incidents.forEach(inc => {
+        const dLat = (inc.location.lat - destLat) * Math.PI / 180;
+        const dLon = (inc.location.lng - destLon) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(destLat * Math.PI / 180) * Math.cos(inc.location.lat * Math.PI / 180) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
+
+        if (d < 2) {
+          nearbyCount++;
+          const type = inc.type ? inc.type.toLowerCase() : '';
+          if (type.includes('theft') || type.includes('harassment') || type.includes('assault')) {
+            seriousIncidentFound = true;
+          } else if (type.includes('lighting') || type.includes('poor')) {
+            riskyIncidentFound = true;
           }
+        }
+      });
 
-          let nearbyCount = 0;
-          let seriousIncidentFound = false;
-          let riskyIncidentFound = false;
+      // Logic: Base 100.
+      // Theft/Harassment -> Force < 50 (e.g., 45)
+      // Poor Lighting -> Force 50-70 (e.g., 65)
+      // Else -> 100 - (count * 10)
 
-          const R = 6371; 
-          incidents.forEach(inc => {
-              const dLat = (inc.location.lat - destLat) * Math.PI / 180;
-              const dLon = (inc.location.lng - destLon) * Math.PI / 180;
-              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                        Math.cos(destLat * Math.PI / 180) * Math.cos(inc.location.lat * Math.PI / 180) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-              const d = R * c;
-              
-              if (d < 2) { 
-                  nearbyCount++;
-                  const type = inc.type ? inc.type.toLowerCase() : '';
-                  if (type.includes('theft') || type.includes('harassment') || type.includes('assault')) {
-                      seriousIncidentFound = true;
-                  } else if (type.includes('lighting') || type.includes('poor')) {
-                      riskyIncidentFound = true;
-                  }
-              }
-          });
+      let score = 100 - (nearbyCount * 10);
 
-          // Logic: Base 100.
-          // Theft/Harassment -> Force < 50 (e.g., 45)
-          // Poor Lighting -> Force 50-70 (e.g., 65)
-          // Else -> 100 - (count * 10)
-          
-          let score = 100 - (nearbyCount * 10);
-          
-          if (seriousIncidentFound) {
-              score = Math.min(score, 45); // Cap at 45 (Danger)
-          } else if (riskyIncidentFound) {
-              score = Math.min(Math.max(score, 50), 70); // Force between 50-70 (Risky)
-              if (score > 70) score = 65; 
-          }
+      if (seriousIncidentFound) {
+        score = Math.min(score, 45); // Cap at 45 (Danger)
+      } else if (riskyIncidentFound) {
+        score = Math.min(Math.max(score, 50), 70); // Force between 50-70 (Risky)
+        if (score > 70) score = 65;
+      }
 
-          if (score < 30) score = 30; // Floor
-          setSafetyScore(score);
+      if (score < 30) score = 30; // Floor
+      setSafetyScore(score);
 
-      } catch (e) { setSafetyScore(null); }
+    } catch (e) { setSafetyScore(null); }
   };
 
   const handleSelectDest = (d) => { setDestination(d); calculateSafetyScore(parseFloat(d.lat), parseFloat(d.lon)); };
-  
+
   // FIX: START TRIP TIMER CALCULATION (Respects Units)
   const startTrip = async () => {
     const token = localStorage.getItem('token');
     const res = await axios.post(`${API_URL}/api/trips/start`, { destination: { name: destination.display_name, lat: destination.lat, lon: destination.lon }, startLocation: userPos }, { headers: { 'x-auth-token': token } });
     setTripDetails(res.data); setIsActive(true);
-    
+
     if (safeCheckInterval) {
-        let multiplier = 60; // Default Minutes
-        if (safeCheckUnit === 'hours') multiplier = 3600;
-        if (safeCheckUnit === 'days') multiplier = 86400;
-        
-        // Ensure parsing is base 10 to avoid any octal issues
-        const val = parseInt(safeCheckInterval, 10);
-        if(!isNaN(val)) {
-            setSafeCheckSeconds(val * multiplier);
-        } else {
-            setSafeCheckSeconds(null);
-        }
+      let multiplier = 60; // Default Minutes
+      if (safeCheckUnit === 'hours') multiplier = 3600;
+      if (safeCheckUnit === 'days') multiplier = 86400;
+
+      // Ensure parsing is base 10 to avoid any octal issues
+      const val = parseInt(safeCheckInterval, 10);
+      if (!isNaN(val)) {
+        setSafeCheckSeconds(val * multiplier);
+      } else {
+        setSafeCheckSeconds(null);
+      }
     }
-    
+
     socketRef.current.emit('joinTripRoom', res.data._id);
     watchIdRef.current = navigator.geolocation.watchPosition(p => {
-         const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
-         setUserPos(coords);
-         socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
+      const coords = { lat: p.coords.latitude, lng: p.coords.longitude };
+      setUserPos(coords);
+      socketRef.current.emit('updateLocation', { tripId: res.data._id, coordinates: coords });
     }, console.error, { enableHighAccuracy: true });
   };
 
   const triggerSOSSequence = () => setSosCountdown(5);
-  const sendSOS = async () => { if(tripDetails && socketRef.current) socketRef.current.emit('sosTriggered', tripDetails._id); };
-  
+  const sendSOS = async () => { if (tripDetails && socketRef.current) socketRef.current.emit('sosTriggered', tripDetails._id); };
+
   // FIX: RESET TIMER ON SAFE (Respects Units)
-  const handleImSafe = async () => { 
-      if(safeCheckInterval) {
-        let multiplier = 60; 
-        if (safeCheckUnit === 'hours') multiplier = 3600;
-        if (safeCheckUnit === 'days') multiplier = 86400;
-        const val = parseInt(safeCheckInterval, 10);
-        if(!isNaN(val)) {
-            setSafeCheckSeconds(val * multiplier);
-        }
+  const handleImSafe = async () => {
+    if (safeCheckInterval) {
+      let multiplier = 60;
+      if (safeCheckUnit === 'hours') multiplier = 3600;
+      if (safeCheckUnit === 'days') multiplier = 86400;
+      const val = parseInt(safeCheckInterval, 10);
+      if (!isNaN(val)) {
+        setSafeCheckSeconds(val * multiplier);
       }
-      if (tripDetails && socketRef.current) socketRef.current.emit('sosCancelled', tripDetails._id);
-      alert("Safe status sent."); 
+    }
+    if (tripDetails && socketRef.current) socketRef.current.emit('sosCancelled', tripDetails._id);
+    alert("Safe status sent.");
   };
-  
-  const endTrip = async () => { 
-      if (tripDetails && socketRef.current) socketRef.current.emit('endTrip', tripDetails._id);
-      setIsActive(false); setTripDetails(null); setDestination(null); alert("Trip Ended"); setIsVoiceListening(false);
+
+  const endTrip = async () => {
+    if (tripDetails && socketRef.current) socketRef.current.emit('endTrip', tripDetails._id);
+    setIsActive(false); setTripDetails(null); setDestination(null); alert("Trip Ended"); setIsVoiceListening(false);
   };
 
   // ZONE HANDLERS
   const toggleZoneMode = () => setIsZoneMode(!isZoneMode);
   const handleMapClick = useCallback((latlng) => { if (isZoneMode) { setNewZoneCoords(latlng); setShowZoneModal(true); } }, [isZoneMode]);
   const saveZone = async (e) => {
-      e.preventDefault();
-      const token = localStorage.getItem('token');
-      const formData = new FormData(e.target);
-      const data = { name: formData.get('name'), type: formData.get('type'), radius: formData.get('radius'), lat: newZoneCoords.lat, lng: newZoneCoords.lng };
-      try {
-          const res = await axios.post(`${API_URL}/api/zones`, data, { headers: { 'x-auth-token': token } });
-          setZones([...zones, res.data]); setShowZoneModal(false); setIsZoneMode(false);
-      } catch (err) { alert('Error'); }
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    const formData = new FormData(e.target);
+    const data = { name: formData.get('name'), type: formData.get('type'), radius: formData.get('radius'), lat: newZoneCoords.lat, lng: newZoneCoords.lng };
+    try {
+      const res = await axios.post(`${API_URL}/api/zones`, data, { headers: { 'x-auth-token': token } });
+      setZones([...zones, res.data]); setShowZoneModal(false); setIsZoneMode(false);
+    } catch (err) { alert('Error'); }
   };
 
   // TIMERS
-  useEffect(() => { 
-      let t; 
-      if (isActive && safeCheckSeconds !== null && sosCountdown === null) {
-          t = setInterval(() => {
-             setSafeCheckSeconds(p => { 
-                 if (p <= 1) { 
-                     triggerSOSSequence(); 
-                     // Auto-reset logic logic if needed, currently manual reset via button
-                     // Calculate reset value:
-                     let multiplier = 60; 
-                     if (safeCheckUnit === 'hours') multiplier = 3600;
-                     if (safeCheckUnit === 'days') multiplier = 86400;
-                     return parseInt(safeCheckInterval, 10) * multiplier; 
-                 } 
-                 return p - 1; 
-             });
-          }, 1000); 
-      }
-      return () => clearInterval(t); 
+  useEffect(() => {
+    let t;
+    if (isActive && safeCheckSeconds !== null && sosCountdown === null) {
+      t = setInterval(() => {
+        setSafeCheckSeconds(p => {
+          if (p <= 1) {
+            triggerSOSSequence();
+            // Auto-reset logic logic if needed, currently manual reset via button
+            // Calculate reset value:
+            let multiplier = 60;
+            if (safeCheckUnit === 'hours') multiplier = 3600;
+            if (safeCheckUnit === 'days') multiplier = 86400;
+            return parseInt(safeCheckInterval, 10) * multiplier;
+          }
+          return p - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(t);
   }, [isActive, safeCheckSeconds, sosCountdown, safeCheckInterval, safeCheckUnit]);
 
   useEffect(() => { let t; if (sosCountdown !== null) { if (sosCountdown > 0) t = setInterval(() => setSosCountdown(p => p - 1), 1000); else { sendSOS(); setSosCountdown(null); } } return () => clearInterval(t); }, [sosCountdown]);
@@ -1169,48 +1172,48 @@ const Dashboard = () => {
     <div className="dashboard-layout">
       <DashboardStyles />
       <div className="map-column">
-          <MapView userPosition={userPos} destination={destination} zones={zones} onMapClick={handleMapClick} isZoneMode={isZoneMode} />
+        <MapView userPosition={userPos} destination={destination} zones={zones} onMapClick={handleMapClick} isZoneMode={isZoneMode} />
       </div>
       <div className="controls-column">
         {isActive ? (
-          <TripStatusPanel 
-             tripDetails={tripDetails} 
-             onEndTrip={endTrip} 
-             contacts={contacts} 
-             onSOS={triggerSOSSequence} 
-             safeCheckSeconds={safeCheckSeconds} 
-             handleImSafe={handleImSafe} 
-             zoneAlert={activeZoneAlert} 
-             routeDeviationAlert={routeDeviationAlert}
-             isVoiceListening={isVoiceListening} 
-             toggleVoiceMode={toggleVoiceMode}   
+          <TripStatusPanel
+            tripDetails={tripDetails}
+            onEndTrip={endTrip}
+            contacts={contacts}
+            onSOS={triggerSOSSequence}
+            safeCheckSeconds={safeCheckSeconds}
+            handleImSafe={handleImSafe}
+            zoneAlert={activeZoneAlert}
+            routeDeviationAlert={routeDeviationAlert}
+            isVoiceListening={isVoiceListening}
+            toggleVoiceMode={toggleVoiceMode}
           />
         ) : (
-          <BeforeTripPanel 
-            contacts={contacts} loading={loading} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} results={results} onSelectDest={handleSelectDest} dest={destination} onStart={startTrip} searchError={searchError} 
-            setSafeCheckInterval={setSafeCheckInterval} 
-            setSafeCheckUnit={setSafeCheckUnit} 
+          <BeforeTripPanel
+            contacts={contacts} loading={loading} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch} results={results} onSelectDest={handleSelectDest} dest={destination} onStart={startTrip} searchError={searchError}
+            setSafeCheckInterval={setSafeCheckInterval}
+            setSafeCheckUnit={setSafeCheckUnit}
             safeCheckUnit={safeCheckUnit}
-            safetyScore={safetyScore} toggleZoneMode={toggleZoneMode} isZoneMode={isZoneMode} 
+            safetyScore={safetyScore} toggleZoneMode={toggleZoneMode} isZoneMode={isZoneMode}
           />
         )}
       </div>
-      {sosCountdown !== null && <div className="sos-countdown-overlay"><h1 style={{fontSize:'3rem'}}>SOS IN...</h1><div className="countdown-number">{sosCountdown}</div><button className="btn-cancel-sos" onClick={() => setSosCountdown(null)}>CANCEL</button></div>}
-      
+      {sosCountdown !== null && <div className="sos-countdown-overlay"><h1 style={{ fontSize: '3rem' }}>SOS IN...</h1><div className="countdown-number">{sosCountdown}</div><button className="btn-cancel-sos" onClick={() => setSosCountdown(null)}>CANCEL</button></div>}
+
       {/* FIX 1: Add Zone Modal (Reverted to your simpler UI) */}
       {showZoneModal && (
-          <div className="modal-overlay">
-              <div className="modal-content">
-                  <h3>Add Safety Zone</h3>
-                  <form onSubmit={saveZone} className="zone-form">
-                      <input name="name" placeholder="Name" required />
-                      <select name="type"><option value="Safe">Safe</option><option value="Danger">Danger</option></select>
-                      <input name="radius" type="number" defaultValue="200" required />
-                      <button type="submit" className="start-trip-button">Save Zone</button>
-                      <button type="button" onClick={() => setShowZoneModal(false)} style={{marginTop:'10px',background:'none',border:'none'}}>Cancel</button>
-                  </form>
-              </div>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Add Safety Zone</h3>
+            <form onSubmit={saveZone} className="zone-form">
+              <input name="name" placeholder="Name" required />
+              <select name="type"><option value="Safe">Safe</option><option value="Danger">Danger</option></select>
+              <input name="radius" type="number" defaultValue="200" required />
+              <button type="submit" className="start-trip-button">Save Zone</button>
+              <button type="button" onClick={() => setShowZoneModal(false)} style={{ marginTop: '10px', background: 'none', border: 'none' }}>Cancel</button>
+            </form>
           </div>
+        </div>
       )}
     </div>
   );
